@@ -7,10 +7,12 @@ SOURCES += \
         main.cpp \
     console/consolecolor.cpp \
     console/letter.cpp \
-    console/widget.cpp
+    console/widget.cpp \
+    game/game.cpp
 
 HEADERS += \
     console/common.h \
     console/consolecolor.h \
     console/letter.h \
-    console/widget.h
+    console/widget.h \
+    game/game.h
