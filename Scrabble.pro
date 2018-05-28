@@ -8,11 +8,13 @@ SOURCES += \
     console/consolecolor.cpp \
     console/letter.cpp \
     console/widget.cpp \
-    game/game.cpp
+    game/game.cpp \
+    game/letterbag.cpp
 
 HEADERS += \
     console/common.h \
     console/consolecolor.h \
     console/letter.h \
     console/widget.h \
-    game/game.h
+    game/game.h \
+    game/letterbag.h

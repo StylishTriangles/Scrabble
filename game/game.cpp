@@ -7,6 +7,7 @@
 Game::Game()
 {
     generateLetterValues();
+    letterBag.loadPolishScrabble();
 }
 
 void Game::run()

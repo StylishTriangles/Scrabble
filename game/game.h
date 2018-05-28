@@ -3,6 +3,7 @@
 #include <map>
 
 #include "console/widget.h"
+#include "game/letterbag.h"
 
 class Game
 {
@@ -15,6 +16,7 @@ private:
 
     Widget boardWidget;
     std::map<wchar_t, int> letterValue;
+    LetterBag letterBag;
 };
 
 #endif // GAME_H
