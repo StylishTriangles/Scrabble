@@ -9,12 +9,16 @@ SOURCES += \
     console/letter.cpp \
     console/widget.cpp \
     game/game.cpp \
-    game/letterbag.cpp
+    game/letterbag.cpp \
+    game/tile.cpp \
+    console/cursor.cpp
 
 HEADERS += \
-    console/common.h \
     console/consolecolor.h \
     console/letter.h \
     console/widget.h \
     game/game.h \
-    game/letterbag.h
+    game/letterbag.h \
+    game/tile.h \
+    common.h \
+    console/cursor.h

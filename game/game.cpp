@@ -1,19 +1,93 @@
 #include "game.h"
+
 #define TESTING
 #ifdef TESTING
 #include <cstdio>
 #endif
 
-Game::Game()
+#include <thread>
+
+Game::Game() :
+    hStdOut(GetStdHandle(STD_OUTPUT_HANDLE))
 {
     generateLetterValues();
+
     letterBag.loadPolishScrabble();
+
+    setupBoard();
+
+    setupWidgets();
 }
 
 void Game::run()
 {
-    while(true) {
+    // control cursor visibility manually
+    CONSOLE_CURSOR_INFO cci;
+    GetConsoleCursorInfo(hStdOut, &cci);
+    cci.bVisible = false;
+    SetConsoleCursorInfo(hStdOut, &cci);
+    boardWidget.toggleCursor();
 
+    while(true) {
+        paintTiles();
+
+        repaint();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
+}
+
+void Game::repaint()
+{
+    boardWidget.display(hStdOut);
+    legendWidget.display(hStdOut);
+}
+
+void Game::setupWidgets()
+{
+    boardWidget.resize(19,19);
+    boardWidget.setBorder(Letter('#', ConsoleColor(GREEN, DARK_GREEN)), 2);
+    boardWidget.setCursor(&cursor);
+
+    legendWidget.resize(10, 19);
+    legendWidget.move(25,0);
+    legendWidget.setBorder(Letter(' ', ConsoleColor(GREY, DARK_PINK)), 1);
+}
+
+void Game::setupBoard()
+{
+    tiles.resize(SCRABBLE_BOARD_SIZE);
+    for (auto &vtile: tiles)
+        vtile.resize(SCRABBLE_BOARD_SIZE);
+
+    const char* sboard =  // T - tword, D - dword, t - tletter, d - dletter
+            "T  d   T   d  T"
+            " D   t   t   D "
+            "  D   d d   D  "
+            "d  D   d   D  d"
+            "    D     D    "
+            " t   t   t   t "
+            "  d   d d   d  "
+            "T  d   D   d  T"
+            "  d   d d   d  "
+            " t   t   t   t "
+            "    D     D    "
+            "d  D   d   D  d"
+            "  D   d d   D  "
+            " D   t   t   D "
+            "T  d   T   d  T";
+    const int N = SCRABBLE_BOARD_SIZE;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            if (sboard[N*i+j] == 'T')
+                tiles[i][j].setBonus(BONUS_TRIPLE_WORD);
+            else if (sboard[N*i+j] == 'D')
+                tiles[i][j].setBonus(BONUS_DOUBLE_WORD);
+            else if (sboard[N*i+j] == 't')
+                tiles[i][j].setBonus(BONUS_TRIPLE_LETTER);
+            else if (sboard[N*i+j] == 'd')
+                tiles[i][j].setBonus(BONUS_DOUBLE_LETTER);
+        }
     }
 }
 
@@ -108,4 +182,31 @@ void Game::generateLetterValues()
             wprintf(L"Game::generateLetterValues(): Not found %lc\n", wc);
     }
 #endif
+}
+
+void Game::paintTiles()
+{
+    CCOLOR textColor = GREY;
+    CCOLOR bgColor = BLACK;
+    for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
+        for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
+            if (tiles[i][j].bonus == BONUS_DOUBLE_LETTER)
+                bgColor = BLUE;
+            else if (tiles[i][j].bonus == BONUS_TRIPLE_LETTER)
+                bgColor = DARK_BLUE;
+            else if (tiles[i][j].bonus == BONUS_DOUBLE_WORD)
+                bgColor = RED;
+            else if (tiles[i][j].bonus == BONUS_TRIPLE_WORD)
+                bgColor = DARK_RED;
+            else
+                bgColor = BLACK;
+            boardWidget.setLetter(i, j, Letter(tiles[i][j].get(),
+                                               ConsoleColor(textColor, bgColor)));
+        }
+    }
+}
+
+void Game::placeTile(wchar_t ch, int x, int y)
+{
+    tiles[y][x].set(ch);
 }
