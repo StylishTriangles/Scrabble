@@ -11,7 +11,8 @@ public:
     Letter(wchar_t c, ConsoleColor col = ConsoleColor());
 
     wchar_t character() const;
-    ConsoleColor color() const;
+    ConsoleColor const& color() const {return col;}
+    ConsoleColor& color() {return col;}
     void display(HANDLE outputHandle) const;
 private:
     wchar_t c;

@@ -13,6 +13,8 @@ Widget::Widget(Widget *parent) :
 
 void Widget::move(int x, int y)
 {
+    cursor->addX(x - location.x);
+    cursor->addY(y - location.y);
     location.x = x;
     location.y = y;
 }
@@ -27,6 +29,15 @@ void Widget::display(HANDLE outputHandle) const
         }
         pos.Y++;
     }
+
+    if (cursorEnabled and cursor != nullptr) {
+        COORD cursorPos = {(SHORT)(cursor->getX()+borderWidth),
+                           (SHORT)(cursor->getY()+borderWidth)};
+        SetConsoleCursorPosition(outputHandle, cursorPos);
+        Letter cpy(screen[cursorPos.Y][cursorPos.X]);
+        cpy.color().swapColors();
+        cpy.display(outputHandle);
+    }
 }
 
 void Widget::resize(int w, int h)
@@ -37,8 +48,12 @@ void Widget::resize(int w, int h)
     setBorder(borderLetter, oldBW);
 }
 
-void Widget::setLetter(int relativeY, int relativeX, Letter l)
+void Widget::setLetter(int relativeY, int relativeX, Letter l, bool paintOnBorder)
 {
+    if (!paintOnBorder) {
+        relativeX += borderWidth;
+        relativeY += borderWidth;
+    }
     screen[relativeY][relativeX] = l;
 }
 
@@ -64,6 +79,11 @@ void Widget::clearBorder(ConsoleColor color)
 {
     setBorder(Letter(' ', color), borderWidth);
     borderWidth = 0;
+}
+
+void Widget::setCursor(Cursor *c)
+{
+    cursor = c;
 }
 
 void Widget::resizeScreen(int w, int h)

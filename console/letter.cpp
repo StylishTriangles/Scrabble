@@ -13,11 +13,6 @@ Letter::Letter(wchar_t c, ConsoleColor col) :
 
 }
 
-ConsoleColor Letter::color() const
-{
-    return col;
-}
-
 void Letter::display(HANDLE outputHandle) const
 {
     SetConsoleTextAttribute(outputHandle, col);
