@@ -13,8 +13,10 @@ Widget::Widget(Widget *parent) :
 
 void Widget::move(int x, int y)
 {
-    cursor->addX(x - location.x);
-    cursor->addY(y - location.y);
+    if (cursor) {
+        cursor->addX(x - location.x);
+        cursor->addY(y - location.y);
+    }
     location.x = x;
     location.y = y;
 }
