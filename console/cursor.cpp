@@ -43,12 +43,12 @@ void Cursor::addY(const int &value)
 
 void Cursor::up()
 {
-    y++;
+    y--;
 }
 
 void Cursor::down()
 {
-    y--;
+    y++;
 }
 
 void Cursor::left()
