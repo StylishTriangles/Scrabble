@@ -7,8 +7,11 @@
 
 #include <thread>
 
+#include "events/eventmanager.h"
+
 Game::Game() :
-    hStdOut(GetStdHandle(STD_OUTPUT_HANDLE))
+    hStdOut(GetStdHandle(STD_OUTPUT_HANDLE)),
+    altDown(false), end(false)
 {
     generateLetterValues();
 
@@ -17,10 +20,15 @@ Game::Game() :
     setupBoard();
 
     setupWidgets();
+
+    bindEvents();
+    // Start event manager
+    EventManager::start();
 }
 
 void Game::run()
 {
+
     // control cursor visibility manually
     CONSOLE_CURSOR_INFO cci;
     GetConsoleCursorInfo(hStdOut, &cci);
@@ -28,19 +36,75 @@ void Game::run()
     SetConsoleCursorInfo(hStdOut, &cci);
     boardWidget.toggleCursor();
 
-    while(true) {
-        paintTiles();
+    while(!end) {
+        // Input
+        EventManager::pollEvents();
 
+        // Display
+        paintTiles();
         repaint();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        // Wait
+        //std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
 void Game::repaint()
 {
     boardWidget.display(hStdOut);
-    legendWidget.display(hStdOut);
+    //legendWidget.display(hStdOut);
+}
+
+void Game::setLanguage(Game::Language l)
+{
+    lang = l;
+}
+
+void Game::keyPressEvent(KeyEvent *e)
+{
+    const short &key = e->key();
+    if (e->key() == VK_RMENU)
+        altDown = true;
+    else if (e->key() == VK_LEFT)
+        cursor.left();
+    else if (e->key() == VK_RIGHT)
+        cursor.right();
+    else if (e->key() == VK_UP)
+        cursor.up();
+    else if (e->key() == VK_DOWN)
+        cursor.down();
+
+    // Virtual key codes match ascii values of letters
+    else if (e->key() >= 'A' && e->key() <= 'Z') {
+        char altFrom[10]    =  "ACELNOSXZ";
+        wchar_t altTo[10]   = L"ĄĆĘŁŃÓŚŹŻ";
+        if (altDown) {
+            for (int i = 0; i < 10; i++) {
+                if (altFrom[i] == key) {
+                    placeLetter(altTo[i]);
+                    break;
+                }
+            }
+        } else {
+            placeLetter(key);
+        }
+    }
+}
+
+void Game::keyReleaseEvent(KeyEvent *e)
+{
+    if (e->key() == VK_RMENU)
+        altDown = false;
+}
+
+void Game::bindEvents()
+{
+    EventManager::connect(KeyPress, [this](Event* e) {
+        keyPressEvent(dynamic_cast<KeyEvent*>(e));
+    });
+    EventManager::connect(KeyRelease, [this](Event* e) {
+        keyReleaseEvent(dynamic_cast<KeyEvent*>(e));
+    });
 }
 
 void Game::setupWidgets()
@@ -186,10 +250,11 @@ void Game::generateLetterValues()
 
 void Game::paintTiles()
 {
-    CCOLOR textColor = GREY;
-    CCOLOR bgColor = BLACK;
     for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
         for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
+            CCOLOR textColor = GREY;
+            CCOLOR bgColor = BLACK;
+            // Set background color if tile is a bonus tile
             if (tiles[i][j].bonus == BONUS_DOUBLE_LETTER)
                 bgColor = BLUE;
             else if (tiles[i][j].bonus == BONUS_TRIPLE_LETTER)
@@ -198,12 +263,21 @@ void Game::paintTiles()
                 bgColor = RED;
             else if (tiles[i][j].bonus == BONUS_TRIPLE_WORD)
                 bgColor = DARK_RED;
-            else
-                bgColor = BLACK;
+
+            // Set font color based on modified flag
+            if (tiles[i][j].modified)
+                textColor = TEAL;
+
+            // Apply colors to widget letters
             boardWidget.setLetter(i, j, Letter(tiles[i][j].get(),
                                                ConsoleColor(textColor, bgColor)));
         }
     }
+}
+
+void Game::placeLetter(wchar_t ch)
+{
+    placeTile(ch, cursor.getX(), cursor.getY());
 }
 
 void Game::placeTile(wchar_t ch, int x, int y)

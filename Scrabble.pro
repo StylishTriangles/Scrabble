@@ -1,5 +1,5 @@
 TEMPLATE = app
-CONFIG += console c++11
+CONFIG += console c++14
 CONFIG -= app_bundle
 CONFIG -= qt
 
@@ -11,7 +11,10 @@ SOURCES += \
     game/game.cpp \
     game/letterbag.cpp \
     game/tile.cpp \
-    console/cursor.cpp
+    console/cursor.cpp \
+    events/eventmanager.cpp \
+    events/keyevent.cpp \
+    events/event.cpp
 
 HEADERS += \
     console/consolecolor.h \
@@ -21,4 +24,7 @@ HEADERS += \
     game/letterbag.h \
     game/tile.h \
     common.h \
-    console/cursor.h
+    console/cursor.h \
+    events/eventmanager.h \
+    events/keyevent.h \
+    events/event.h

@@ -1,8 +1,7 @@
-#include <iostream>
+#include <cstdio>
 #include <Windows.h>
 
 #include "console/widget.h"
-#define TESTING
 #include "game/game.h"
 using namespace std;
 

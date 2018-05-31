@@ -14,6 +14,7 @@ class Tile
 {
 public:
     Tile();
+    bool empty() {return (letter != L' ') & (letter != 0);}
     bool isBonus() {return bonus != BONUS_NONE;}
     void set(wchar_t ch);
     void setBonus(uint16 bonusType) {bonus = bonusType;}

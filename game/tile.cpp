@@ -1,6 +1,7 @@
 #include "tile.h"
 
 Tile::Tile() :
+    modified(false), bonus(BONUS_NONE),
     letter(L' '), backup(letter)
 {
 
