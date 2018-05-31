@@ -16,9 +16,9 @@ Letter::Letter(wchar_t c, ConsoleColor col) :
 void Letter::display(HANDLE outputHandle) const
 {
     SetConsoleTextAttribute(outputHandle, col);
-    putwc(c, stdout);
-    //DWORD throwaway;
-    //WriteConsoleW(outputHandle, &c, 1, &throwaway, NULL);
+//    putwc(c, stdout);
+    DWORD throwaway;
+    WriteConsoleW(outputHandle, &c, 1, &throwaway, NULL);
 }
 
 wchar_t Letter::character() const
