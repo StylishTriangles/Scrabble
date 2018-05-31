@@ -27,6 +27,8 @@ public:
     ConsoleColor(CCOLOR foreground = GREY, CCOLOR background = BLACK); // default terminal colors
 
     void swapColors(); // swap background and foreground colors
+    void setBackground(CCOLOR c) {bg = c;}
+    void setForeground(CCOLOR c) {fg = c;}
 
     operator SHORT() const;
 private:

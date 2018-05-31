@@ -2,7 +2,7 @@
 #include <algorithm>
 
 Widget::Widget(Widget *parent) :
-    parent(parent), location(0,0,1,1)
+    parent(parent), location(0,0,1,1), borderWidth(0)
 {
     static int IDenum = 0;
     IDenum++;
@@ -64,6 +64,45 @@ void Widget::setLetter(int relativeY, int relativeX, Letter l, bool paintOnBorde
         relativeY += borderWidth;
     }
     screen[relativeY][relativeX] = l;
+}
+
+void Widget::setString(int relativeY, int relativeX, const wchar_t *cwstr, ConsoleColor col, bool paintOnBorder)
+{
+    int maxX = width();
+    int maxY = height();
+    if (!paintOnBorder) {
+        relativeX += borderWidth;
+        relativeY += borderWidth;
+        maxX-=borderWidth;
+        maxY-=borderWidth;
+    }
+    int lineBegin = relativeX;
+    paintOnBorder &= 1;
+    while (*cwstr) {
+        if (relativeX >= maxX or *cwstr == L'\n') {
+            relativeY++;
+            relativeX = lineBegin;
+        }
+        if (*cwstr == L'\n') {
+            ++cwstr;
+            continue;
+        }
+        if (relativeY >= maxY) {
+            return;
+        }
+        screen[relativeY][relativeX] = Letter(*cwstr, col);
+        ++relativeX;
+        ++cwstr;
+    }
+}
+
+void Widget::setBackgroundColor(CCOLOR c)
+{
+    for (int i = borderWidth; i < height() - borderWidth; i++) {
+        for (int j = borderWidth; j < width() - borderWidth; j++) {
+            screen[i][j].color().setBackground(c);
+        }
+    }
 }
 
 void Widget::setBorder(Letter l, int16 width)
