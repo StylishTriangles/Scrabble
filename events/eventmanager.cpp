@@ -72,18 +72,22 @@ void EventManager::scanEvents()
 {
     bool keyState[0xFF] = {};
     while (!terminate.load()) {
-        eqLock.lock();
-        // keyboard
+        // keyboard events
 #ifdef WIN32
         for (int i = 8; i < 0xFF; i++) { // start from 8 to skip mouse buttons
             bool ks = ((unsigned short)GetKeyState(i))&(1<<15);
-            if (ks & !keyState[i])
+            if (ks & !keyState[i]) {
+                eqLock.lock();
                 eq.push(new KeyEvent(KeyPress, (short)i));
-            else if (!ks & keyState[i])
+                eqLock.unlock();
+            }
+            else if (!ks & keyState[i]) {
+                eqLock.lock();
                 eq.push(new KeyEvent(KeyRelease, (short)i));
+                eqLock.unlock();
+            }
             keyState[i] = ks;
         }
 #endif
-        eqLock.unlock();
     }
 }

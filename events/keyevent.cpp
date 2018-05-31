@@ -7,7 +7,7 @@ KeyEvent::KeyEvent(EventType t, short keyCode) :
 
 }
 
-short KeyEvent::key()
+const short& KeyEvent::key() const
 {
     return virtualKeyCode;
 }

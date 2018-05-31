@@ -7,7 +7,7 @@ class KeyEvent : public Event
 {
 public:
     KeyEvent(EventType t, short keyCode);
-    short key();
+    const short &key() const;
 private:
     short virtualKeyCode;
 };
