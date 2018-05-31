@@ -14,7 +14,8 @@ SOURCES += \
     console/cursor.cpp \
     events/eventmanager.cpp \
     events/keyevent.cpp \
-    events/event.cpp
+    events/event.cpp \
+    game/player.cpp
 
 HEADERS += \
     console/consolecolor.h \
@@ -27,4 +28,5 @@ HEADERS += \
     console/cursor.h \
     events/eventmanager.h \
     events/keyevent.h \
-    events/event.h
+    events/event.h \
+    game/player.h

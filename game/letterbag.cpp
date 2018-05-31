@@ -18,6 +18,7 @@ void LetterBag::shuffle()
 
 void LetterBag::constructBag(const std::initializer_list<std::pair<wchar_t, int> > &init)
 {
+    bag.clear();
     for (auto pwi: init) {
         while (pwi.second--) {
             bag.push_back(pwi.first);

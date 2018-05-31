@@ -16,6 +16,7 @@ public:
     void loadPolishScrabble();
 private:
     // all shuffle related tasks are performed automatically
+    // therefore user can't shuffle manually
     void shuffle();
     void constructBag(const std::initializer_list<std::pair<wchar_t, int> > &init);
 

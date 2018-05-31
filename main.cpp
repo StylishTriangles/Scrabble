@@ -7,8 +7,9 @@ using namespace std;
 
 int main()
 {
+    int dbg = sizeof(Game);
     SetConsoleTitleW(L"Scrabble");
-    Game g;
-    g.run();
+    Game* g = new Game();
+    g->run();
     return 0;
 }

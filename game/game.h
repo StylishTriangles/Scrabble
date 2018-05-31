@@ -39,7 +39,7 @@ private:
     void placeTile(wchar_t ch, int x, int y);
 
     HANDLE hStdOut;
-    Widget boardWidget, legendWidget;
+    Widget boardWidget, legendWidget, scoresWidget;
     Cursor cursor;
     std::map<wchar_t, int> letterValue;
     LetterBag letterBag;

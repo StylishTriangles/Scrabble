@@ -12,22 +12,18 @@
 Game::Game() :
     hStdOut(GetStdHandle(STD_OUTPUT_HANDLE)),
     altDown(false), end(false)
-{
-    generateLetterValues();
-
-    letterBag.loadPolishScrabble();
-
-    setupBoard();
-
-    setupWidgets();
-
-    bindEvents();
-    // Start event manager
-    EventManager::start();
-}
+{}
 
 void Game::run()
 {
+    // setup
+    generateLetterValues();
+    letterBag.loadPolishScrabble();
+    setupBoard();
+    setupWidgets();
+    bindEvents();
+    // Start event manager
+    EventManager::start();
 
     // control cursor visibility manually
     CONSOLE_CURSOR_INFO cci;
@@ -52,7 +48,8 @@ void Game::run()
 void Game::repaint()
 {
     boardWidget.display(hStdOut);
-    //legendWidget.display(hStdOut);
+    legendWidget.display(hStdOut);
+    scoresWidget.display(hStdOut);
 }
 
 void Game::setLanguage(Game::Language l)
@@ -114,8 +111,32 @@ void Game::setupWidgets()
     boardWidget.setCursor(&cursor);
 
     legendWidget.resize(10, 19);
-    legendWidget.move(25,0);
-    legendWidget.setBorder(Letter(' ', ConsoleColor(GREY, DARK_PINK)), 1);
+    legendWidget.move(22,0);
+    legendWidget.setBorder(Letter('#', ConsoleColor(GREEN, DARK_GREEN)), 1);
+    legendWidget.setBackgroundColor(DARK_TEAL);
+    legendWidget.setString(0,0,L"LEGEND:", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setString(1,0,L"========", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setLetter(2,0,Letter(' ', ConsoleColor(BLACK, DARK_RED)));
+    legendWidget.setString(2,1,L"-triple\n word", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setString(4,0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setLetter(5,0,Letter(' ', ConsoleColor(BLACK, RED)));
+    legendWidget.setString(5,1,L"-double\n word", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setString(7,0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setLetter(8,0,Letter(' ', ConsoleColor(BLACK, DARK_BLUE)));
+    legendWidget.setString(8,1,L"-triple\n letter", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setString(10,0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setLetter(11,0,Letter(' ', ConsoleColor(BLACK, BLUE)));
+    legendWidget.setString(11,1,L"-double\n letter", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setString(13,0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setLetter(14,0,Letter(' ', ConsoleColor(BLACK, GREY)));
+    legendWidget.setString(14,1,L"-cursor", ConsoleColor(WHITE, DARK_TEAL));
+
+    scoresWidget.resize(14,10);
+    scoresWidget.move(35,0);
+    scoresWidget.setBorder(Letter('#', ConsoleColor(GREEN, DARK_GREEN)), 1);
+    scoresWidget.setBackgroundColor(DARK_TEAL);
+    scoresWidget.setString(0,3,L"SCORES:", ConsoleColor(WHITE, DARK_TEAL));
+    scoresWidget.setString(1,0,L"============", ConsoleColor(WHITE, DARK_TEAL));
 }
 
 void Game::setupBoard()
