@@ -21,8 +21,19 @@ void Widget::move(int x, int y)
     location.y = y;
 }
 
-void Widget::display(HANDLE outputHandle) const
+void Widget::display(HANDLE outputHandle)
 {
+    Letter cpy;
+    COORD cursorPos;
+    if (cursorEnabled and cursor != nullptr) {
+        cursorPos = {(SHORT)(cursor->getX()+borderWidth),
+                     (SHORT)(cursor->getY()+borderWidth)};
+        SetConsoleCursorPosition(outputHandle, cursorPos);
+        // backup symbol under cursor
+        cpy = Letter(screen[cursorPos.Y][cursorPos.X]);
+        // modify symbol
+        screen[cursorPos.Y][cursorPos.X].color().swapColors();
+    }
     COORD pos = makeCOORD(location.x, location.y);
     while (pos.Y < location.y + location.h) {
         SetConsoleCursorPosition(outputHandle, pos);
@@ -31,15 +42,11 @@ void Widget::display(HANDLE outputHandle) const
         }
         pos.Y++;
     }
-
     if (cursorEnabled and cursor != nullptr) {
-        COORD cursorPos = {(SHORT)(cursor->getX()+borderWidth),
-                           (SHORT)(cursor->getY()+borderWidth)};
-        SetConsoleCursorPosition(outputHandle, cursorPos);
-        Letter cpy(screen[cursorPos.Y][cursorPos.X]);
-        cpy.color().swapColors();
-        cpy.display(outputHandle);
+        // restore symbol under cursor
+        screen[cursorPos.Y][cursorPos.X] = cpy;
     }
+
 }
 
 void Widget::resize(int w, int h)
