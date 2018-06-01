@@ -2,7 +2,8 @@
 
 Player::Player(const wchar_t *name, bool active) :
     myName(name),
-    active(active)
+    active(active),
+    score(0)
 {
 
 }
@@ -25,12 +26,19 @@ bool Player::hasLetter(wchar_t l) const
 
 void Player::insertLetter(wchar_t l)
 {
-    ownedLetters.push_front(l);
+    ownedLetters.push_back(l);
 }
 
 void Player::removeLetter(wchar_t l)
 {
-    ownedLetters.remove(l);
+    auto it = ownedLetters.begin();
+    while (it != ownedLetters.end()) {
+        if (*it == l) {
+            ownedLetters.erase(it);
+            return;
+        }
+        ++it;
+    }
 }
 
 int Player::letterCount() const

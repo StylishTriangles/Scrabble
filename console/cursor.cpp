@@ -60,3 +60,11 @@ void Cursor::right()
 {
     x++;
 }
+
+void Cursor::fitInBox(int xmin, int ymin, int xmax, int ymax)
+{
+    x = (x<xmin)?xmin:x;
+    x = (x>xmax)?xmax:x;
+    y = (y<ymin)?ymin:y;
+    y = (y>ymax)?ymax:y;
+}

@@ -22,6 +22,8 @@ public:
     void left();
     void right();
 
+    void fitInBox(int xmin, int ymin, int xmax, int ymax);
+
 private:
     int x;
     int y;

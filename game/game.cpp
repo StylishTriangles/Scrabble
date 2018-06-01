@@ -5,6 +5,7 @@
 #include <cstdio>
 #endif
 
+#include <cwchar>
 #include <thread>
 
 #include "events/eventmanager.h"
@@ -32,12 +33,22 @@ void Game::run()
     SetConsoleCursorInfo(hStdOut, &cci);
     boardWidget.toggleCursor();
 
+    // Set current player
+    players.front().activate();
+    currentPlayer = players.begin();
     while(!end) {
+        resetTickVars();
         // Input
         EventManager::pollEvents();
 
-        // Display
+        if (commited)
+            nextPlayer();
+
+        // Prepare widgets
+        updateScoreboard();
         paintTiles();
+
+        // Display
         repaint();
 
         // Wait
@@ -57,20 +68,33 @@ void Game::setLanguage(Game::Language l)
     lang = l;
 }
 
+void Game::addPlayer(const wchar_t *name)
+{
+    if (wcslen(name) > MAX_PLAYER_NAME_LEN)
+        players.emplace_back(Player(L"LONGNAME", false));
+    else
+        players.emplace_back(Player(name, false));
+}
+
 void Game::keyPressEvent(KeyEvent *e)
 {
+    if (commited) // Ignore all inputs after commiting tiles on board
+        return;
     const short &key = e->key();
     if (e->key() == VK_RMENU)
         altDown = true;
-    else if (e->key() == VK_LEFT)
+    else if (key == VK_LEFT)
         cursor.left();
-    else if (e->key() == VK_RIGHT)
+    else if (key == VK_RIGHT)
         cursor.right();
-    else if (e->key() == VK_UP)
+    else if (key == VK_UP)
         cursor.up();
-    else if (e->key() == VK_DOWN)
+    else if (key == VK_DOWN)
         cursor.down();
-
+    else if (key == VK_RETURN)
+        commitTiles();
+    else if (key == VK_BACK)
+        undoTile();
     // Virtual key codes match ascii values of letters
     else if (e->key() >= 'A' && e->key() <= 'Z') {
         char altFrom[10]    =  "ACELNOSXZ";
@@ -131,12 +155,15 @@ void Game::setupWidgets()
     legendWidget.setLetter(14,0,Letter(' ', ConsoleColor(BLACK, GREY)));
     legendWidget.setString(14,1,L"-cursor", ConsoleColor(WHITE, DARK_TEAL));
 
-    scoresWidget.resize(14,10);
+    scoresWidget.resize(14,11);
     scoresWidget.move(35,0);
     scoresWidget.setBorder(Letter('#', ConsoleColor(GREEN, DARK_GREEN)), 1);
     scoresWidget.setBackgroundColor(DARK_TEAL);
     scoresWidget.setString(0,3,L"SCORES:", ConsoleColor(WHITE, DARK_TEAL));
     scoresWidget.setString(1,0,L"============", ConsoleColor(WHITE, DARK_TEAL));
+    scoresWidget.setString(3,0,L"============", ConsoleColor(WHITE, DARK_TEAL));
+    scoresWidget.setString(5,0,L"============", ConsoleColor(WHITE, DARK_TEAL));
+    scoresWidget.setString(7,0,L"============", ConsoleColor(WHITE, DARK_TEAL));
 }
 
 void Game::setupBoard()
@@ -273,7 +300,7 @@ void Game::paintTiles()
 {
     for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
         for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
-            CCOLOR textColor = GREY;
+            CCOLOR textColor = WHITE;
             CCOLOR bgColor = BLACK;
             // Set background color if tile is a bonus tile
             if (tiles[i][j].bonus == BONUS_DOUBLE_LETTER)
@@ -296,6 +323,21 @@ void Game::paintTiles()
     }
 }
 
+void Game::resetTickVars()
+{
+    commited = false;
+}
+
+void Game::commitTiles()
+{
+    commited = true;
+    // TODO: count scores
+
+    for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++)
+        for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++)
+            tiles[i][j].commit(); // It is safe to commit already commited tiles
+}
+
 void Game::placeLetter(wchar_t ch)
 {
     placeTile(ch, cursor.getX(), cursor.getY());
@@ -304,4 +346,37 @@ void Game::placeLetter(wchar_t ch)
 void Game::placeTile(wchar_t ch, int x, int y)
 {
     tiles[y][x].set(ch);
+}
+
+void Game::undoTile()
+{
+    tiles[cursor.getY()][cursor.getX()].undo();
+}
+
+void Game::nextPlayer()
+{
+    currentPlayer->deactivate();
+    ++currentPlayer;
+    if (currentPlayer == players.end())
+        currentPlayer = players.begin();
+    currentPlayer->activate();
+}
+
+void Game::updateScoreboard()
+{
+    const CCOLOR activeColor = TEAL;
+    const CCOLOR inactiveColor = GREY;
+    auto it = players.begin();
+    for (int i = 2; it != players.end(); ++it, i+=2) {
+        CCOLOR pColor;
+        wchar_t buff[8] = {};
+        swprintf(buff, L"%d", it->getScore());
+        if (it->isActive())
+            pColor = activeColor;
+        else
+            pColor = inactiveColor;
+        int xpos = scoresWidget.canvasWidth() - wstrlen(buff);
+        scoresWidget.setString(i, 0, it->name(), ConsoleColor(pColor,DARK_TEAL));
+        scoresWidget.setString(i, xpos, buff, ConsoleColor(WHITE,DARK_TEAL));
+    }
 }

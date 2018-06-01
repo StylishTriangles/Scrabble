@@ -7,9 +7,10 @@ using namespace std;
 
 int main()
 {
-    int dbg = sizeof(Game);
     SetConsoleTitleW(L"Scrabble");
     Game* g = new Game();
+    g->addPlayer(L"Łukasz");
+    g->addPlayer(L"Ptak");
     g->run();
     return 0;
 }

@@ -23,5 +23,6 @@ inline COORD makeCOORD(short x, short y) {
     return {x,y};
 }
 
+int wstrlen(const wchar_t* str);
 
 #endif // COMMON_H

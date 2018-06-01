@@ -27,6 +27,8 @@ public:
 
     int16 width() const {return location.w;}
     int16 height() const {return location.h;}
+    int16 canvasWidth() const {return location.w-borderWidth*2;}
+    int16 canvasHeight() const {return location.h-borderWidth*2;}
 
     void setCursor(Cursor* c);
     void toggleCursor() {cursorEnabled^=1;}
