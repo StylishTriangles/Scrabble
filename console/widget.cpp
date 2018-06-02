@@ -66,6 +66,11 @@ void Widget::setLetter(int relativeY, int relativeX, Letter l, bool paintOnBorde
     screen[relativeY][relativeX] = l;
 }
 
+void Widget::setLetter(int relativeY, int relativeX, wchar_t l, ConsoleColor col, bool paintOnBorder)
+{
+    setLetter(relativeY, relativeX, Letter(l, col), paintOnBorder);
+}
+
 void Widget::setString(int relativeY, int relativeX, const wchar_t *cwstr, ConsoleColor col, bool paintOnBorder)
 {
     int maxX = width();

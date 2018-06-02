@@ -16,6 +16,7 @@ public:
     void display(HANDLE outputHandle);
     void resize(int w, int h);
     void setLetter(int relativeY, int relativeX, Letter l, bool paintOnBorder = false);
+    void setLetter(int relativeY, int relativeX, wchar_t l, ConsoleColor col = ConsoleColor(), bool paintOnBorder = false);
     void setString(int relativeY, int relativeX, const wchar_t* cwstr,
                    ConsoleColor col = ConsoleColor(), bool paintOnBorder = false);
     void setBackgroundColor(CCOLOR c);
