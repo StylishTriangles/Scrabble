@@ -1,8 +1,9 @@
 #include "letterbag.h"
 #include <algorithm>
+#include <ctime>
 
 LetterBag::LetterBag(std::initializer_list<std::pair<wchar_t, int> > init) :
-    rng((std::random_device())())
+    rng(time(NULL))
 {
     constructBag(init);
     shuffle();
@@ -26,7 +27,7 @@ void LetterBag::constructBag(const std::initializer_list<std::pair<wchar_t, int>
     }
 }
 
-wchar_t LetterBag::popLetter()
+wchar_t LetterBag::pop()
 {
     wchar_t ret = bag.back();
     bag.pop_back();
@@ -77,7 +78,7 @@ void LetterBag::loadPolishScrabble()
         {L'Ź', 1},
         {L'Ż', 1},
 
-        {L' ', 2}, // placeholder for blank
+        {L'░', 2}, // placeholder for blank
     });
     shuffle();
 }

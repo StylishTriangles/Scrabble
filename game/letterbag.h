@@ -11,7 +11,7 @@ public:
     LetterBag(std::initializer_list< std::pair<wchar_t, int> > init = {});
 
     bool empty() const {return bag.empty();}
-    wchar_t popLetter();
+    wchar_t pop();
     void insert(wchar_t letter);
     void loadPolishScrabble();
 private:

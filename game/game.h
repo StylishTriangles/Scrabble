@@ -13,7 +13,9 @@
 #include "game/tile.h"
 
 #define SCRABBLE_BOARD_SIZE 15 // H == W
-#define MAX_PLAYER_NAME_LEN 8
+#define MAX_PLAYER_NAME_LEN 9
+#define MAX_LETTERS_ON_HAND 7
+#define SCRABBLE_BLANK (L'░') // Don't change this line
 
 class Game
 {
@@ -38,15 +40,21 @@ private:
     void generateLetterValues();
     void paintTiles(); // paint tiles on widget
     void resetTickVars();
+    void disableSeizureMode();
 
     // game board control
     void commitTiles();
+    void countScore();
     void placeLetter(wchar_t ch);
     void placeTile(wchar_t ch, int x, int y);
     void undoTile();
+    void undoTile(int x, int y);
+    void undoAll();
+    void paintScoreDelta();
 
     // player control
     void nextPlayer(); // set next player as active
+    void updateLettersWidget();
 
     // scoreboard control
     void updateScoreboard();
@@ -60,9 +68,11 @@ private:
     std::list< Player > players;
     std::list< Player >::iterator currentPlayer;
     Language lang;
+    int scoreDelta;
     bool altDown;
     bool end;
     bool commited;
+    bool removeMode;
 };
 
 #endif // GAME_H

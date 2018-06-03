@@ -24,5 +24,7 @@ inline COORD makeCOORD(short x, short y) {
 }
 
 int wstrlen(const wchar_t* str);
+const wchar_t *digitToWStr(unsigned d);
+void strToWStr(wchar_t *out, const char *in);
 
 #endif // COMMON_H

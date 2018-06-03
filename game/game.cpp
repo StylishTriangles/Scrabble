@@ -12,26 +12,24 @@
 
 Game::Game() :
     hStdOut(GetStdHandle(STD_OUTPUT_HANDLE)),
-    altDown(false), end(false)
-{}
+    scoreDelta(0),
+    altDown(false), end(false), removeMode(false)
+{
+    letterBag.loadPolishScrabble();
+}
 
 void Game::run()
 {
     // setup
     generateLetterValues();
-    letterBag.loadPolishScrabble();
     setupBoard();
     setupWidgets();
     bindEvents();
     // Start event manager
     EventManager::start();
 
-    // control cursor visibility manually
-    CONSOLE_CURSOR_INFO cci;
-    GetConsoleCursorInfo(hStdOut, &cci);
-    cci.bVisible = false;
-    SetConsoleCursorInfo(hStdOut, &cci);
-    boardWidget.toggleCursor();
+    // You don't want your players to get seizures
+    disableSeizureMode();
 
     // Set current player
     players.front().activate();
@@ -46,7 +44,9 @@ void Game::run()
 
         // Prepare widgets
         updateScoreboard();
+        updateLettersWidget();
         paintTiles();
+        paintScoreDelta();
 
         // Display
         repaint();
@@ -61,6 +61,7 @@ void Game::repaint()
     boardWidget.display(hStdOut);
     legendWidget.display(hStdOut);
     scoresWidget.display(hStdOut);
+    lettersWidget.display(hStdOut);
 }
 
 void Game::setLanguage(Game::Language l)
@@ -74,6 +75,7 @@ void Game::addPlayer(const wchar_t *name)
         players.emplace_back(Player(L"LONGNAME", false));
     else
         players.emplace_back(Player(name, false));
+    players.back().takeLetters(&letterBag, MAX_LETTERS_ON_HAND);
 }
 
 void Game::keyPressEvent(KeyEvent *e)
@@ -93,8 +95,14 @@ void Game::keyPressEvent(KeyEvent *e)
         cursor.down();
     else if (key == VK_RETURN)
         commitTiles();
-    else if (key == VK_BACK)
-        undoTile();
+    else if (key == VK_BACK) {
+        if (altDown)
+            undoAll();
+        else
+            undoTile();
+    } else if (key == VK_TAB) {
+        disableSeizureMode();
+    }
     // Virtual key codes match ascii values of letters
     else if (e->key() >= 'A' && e->key() <= 'Z') {
         char altFrom[10]    =  "ACELNOSXZ";
@@ -109,7 +117,10 @@ void Game::keyPressEvent(KeyEvent *e)
         } else {
             placeLetter(key);
         }
+    } else if (key == VK_SPACE) {
+        placeLetter(SCRABBLE_BLANK);
     }
+    cursor.fitInBox(0,0,SCRABBLE_BOARD_SIZE-1, SCRABBLE_BOARD_SIZE-1);
 }
 
 void Game::keyReleaseEvent(KeyEvent *e)
@@ -138,32 +149,45 @@ void Game::setupWidgets()
     legendWidget.move(22,0);
     legendWidget.setBorder(Letter('#', ConsoleColor(GREEN, DARK_GREEN)), 1);
     legendWidget.setBackgroundColor(DARK_TEAL);
-    legendWidget.setString(0,0,L"LEGEND:", ConsoleColor(WHITE, DARK_TEAL));
-    legendWidget.setString(1,0,L"========", ConsoleColor(WHITE, DARK_TEAL));
-    legendWidget.setLetter(2,0,Letter(' ', ConsoleColor(BLACK, DARK_RED)));
-    legendWidget.setString(2,1,L"-triple\n word", ConsoleColor(WHITE, DARK_TEAL));
-    legendWidget.setString(4,0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
-    legendWidget.setLetter(5,0,Letter(' ', ConsoleColor(BLACK, RED)));
-    legendWidget.setString(5,1,L"-double\n word", ConsoleColor(WHITE, DARK_TEAL));
-    legendWidget.setString(7,0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
-    legendWidget.setLetter(8,0,Letter(' ', ConsoleColor(BLACK, DARK_BLUE)));
-    legendWidget.setString(8,1,L"-triple\n letter", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setString(0, 0,L"LEGEND:", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setString(1, 0,L"========", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setLetter(2, 0,Letter(' ', ConsoleColor(BLACK, DARK_RED)));
+    legendWidget.setString(2, 1,L"-triple\n word", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setString(4, 0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setLetter(5, 0,Letter(' ', ConsoleColor(BLACK, RED)));
+    legendWidget.setString(5, 1,L"-double\n word", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setString(7, 0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setLetter(8, 0,Letter(' ', ConsoleColor(BLACK, DARK_BLUE)));
+    legendWidget.setString(8, 1,L"-triple\n letter", ConsoleColor(WHITE, DARK_TEAL));
     legendWidget.setString(10,0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
     legendWidget.setLetter(11,0,Letter(' ', ConsoleColor(BLACK, BLUE)));
     legendWidget.setString(11,1,L"-double\n letter", ConsoleColor(WHITE, DARK_TEAL));
     legendWidget.setString(13,0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
     legendWidget.setLetter(14,0,Letter(' ', ConsoleColor(BLACK, GREY)));
     legendWidget.setString(14,1,L"-cursor", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setString(15,0,L"--------", ConsoleColor(WHITE, DARK_TEAL));
+    legendWidget.setLetter(16,0,Letter(L'░', ConsoleColor(BLACK, GREY)));
+    legendWidget.setString(16,1,L"-blank", ConsoleColor(WHITE, DARK_TEAL));
 
-    scoresWidget.resize(14,11);
+    scoresWidget.resize(15,11);
     scoresWidget.move(35,0);
     scoresWidget.setBorder(Letter('#', ConsoleColor(GREEN, DARK_GREEN)), 1);
     scoresWidget.setBackgroundColor(DARK_TEAL);
     scoresWidget.setString(0,3,L"SCORES:", ConsoleColor(WHITE, DARK_TEAL));
-    scoresWidget.setString(1,0,L"============", ConsoleColor(WHITE, DARK_TEAL));
-    scoresWidget.setString(3,0,L"============", ConsoleColor(WHITE, DARK_TEAL));
-    scoresWidget.setString(5,0,L"============", ConsoleColor(WHITE, DARK_TEAL));
-    scoresWidget.setString(7,0,L"============", ConsoleColor(WHITE, DARK_TEAL));
+    scoresWidget.setString(1,0,L"=============", ConsoleColor(WHITE, DARK_TEAL));
+    scoresWidget.setString(3,0,L"=============", ConsoleColor(WHITE, DARK_TEAL));
+    scoresWidget.setString(5,0,L"=============", ConsoleColor(WHITE, DARK_TEAL));
+    scoresWidget.setString(7,0,L"=============", ConsoleColor(WHITE, DARK_TEAL));
+
+    lettersWidget.resize(15,6);
+    lettersWidget.move(35,13);
+    lettersWidget.setBorder(Letter('#', ConsoleColor(GREEN, DARK_GREEN)), 1);
+    lettersWidget.setString(0,4,L"LETTERS", ConsoleColor(GREEN, DARK_GREEN), true);
+    lettersWidget.setString(0,0,L"─┬─┬─┬─┬─┬─┬─", ConsoleColor(WHITE, GREY));
+    lettersWidget.setString(1,0,L" | | | | | | ", ConsoleColor(WHITE, GREY));
+    lettersWidget.setString(2,0,L" | | | | | | ", ConsoleColor(WHITE, GREY));
+    lettersWidget.setString(3,0,L"─┴─┴─┴─┴─┴─┴─", ConsoleColor(WHITE, GREY));
+    lettersWidget.setBackgroundColor(GREY);
 }
 
 void Game::setupBoard()
@@ -283,7 +307,7 @@ void Game::generateLetterValues()
         {L'Ź', 9},
         {L'Ż', 5},
 
-        {L' ', 0}, // placeholder for blank
+        {SCRABBLE_BLANK, 0},
     };
 
 #ifdef TESTING
@@ -300,7 +324,7 @@ void Game::paintTiles()
 {
     for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
         for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
-            CCOLOR textColor = WHITE;
+            CCOLOR textColor = GREY;
             CCOLOR bgColor = BLACK;
             // Set background color if tile is a bonus tile
             if (tiles[i][j].bonus == BONUS_DOUBLE_LETTER)
@@ -313,6 +337,10 @@ void Game::paintTiles()
                 bgColor = DARK_RED;
 
             // Set font color based on modified flag
+            if (!tiles[i][j].empty()) {
+                textColor = BLACK;
+                bgColor = GREY;
+            }
             if (tiles[i][j].modified)
                 textColor = TEAL;
 
@@ -328,14 +356,99 @@ void Game::resetTickVars()
     commited = false;
 }
 
+void Game::disableSeizureMode()
+{
+    // Disable the annoying console cursor
+    CONSOLE_CURSOR_INFO cci;
+    GetConsoleCursorInfo(hStdOut, &cci);
+    cci.bVisible = false;
+    SetConsoleCursorInfo(hStdOut, &cci);
+    boardWidget.toggleCursor();
+}
+
 void Game::commitTiles()
 {
     commited = true;
+    currentPlayer->removeUsedLetters();
+    currentPlayer->takeLetters(&letterBag, MAX_LETTERS_ON_HAND);
+
     // TODO: count scores
+    countScore();
+    currentPlayer->addScore(scoreDelta);
 
     for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++)
         for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++)
             tiles[i][j].commit(); // It is safe to commit already commited tiles
+}
+
+void Game::countScore()
+{
+    scoreDelta = 0;
+    for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
+        int score = 0;
+        int ok = 0;
+        int count = 0;
+        int wordMult = 1;
+        for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
+            if (!tiles[i][j].empty()) {
+                uint16 bonus = tiles[i][j].getBonus();
+                int letterMult = 1;
+                if (tiles[i][j].modified) {
+                    ok += 1;
+                    if (bonus == BONUS_DOUBLE_WORD)
+                        wordMult *= 2;
+                    else if (bonus == BONUS_TRIPLE_WORD)
+                        wordMult *= 3;
+                    else if (bonus == BONUS_DOUBLE_LETTER)
+                        letterMult = 2;
+                    else if (bonus == BONUS_TRIPLE_LETTER)
+                        letterMult = 3;
+                }
+                score += letterValue[tiles[i][j].get()] * letterMult;
+                count++;
+            } else {
+                if (ok and count > 1)
+                    scoreDelta += wordMult*score;
+                score = 0;
+                count = 0;
+                ok = 0;
+                wordMult = 1;
+            }
+        }
+    }
+    // Same as above but the axes are swapped
+    for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
+        int score = 0;
+        int ok = 0;
+        int count = 0;
+        int wordMult = 1;
+        for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
+            if (!tiles[i][j].empty()) {
+                uint16 bonus = tiles[i][j].getBonus();
+                int letterMult = 1;
+                if (tiles[i][j].modified) {
+                    ok += 1;
+                    if (bonus == BONUS_DOUBLE_WORD)
+                        wordMult *= 2;
+                    else if (bonus == BONUS_TRIPLE_WORD)
+                        wordMult *= 3;
+                    else if (bonus == BONUS_DOUBLE_LETTER)
+                        letterMult = 2;
+                    else if (bonus == BONUS_TRIPLE_LETTER)
+                        letterMult = 3;
+                }
+                score += letterValue[tiles[i][j].get()] * letterMult;
+                count++;
+            } else {
+                if (ok and count > 1)
+                    scoreDelta += wordMult*score;
+                score = 0;
+                count = 0;
+                ok = 0;
+                wordMult = 1;
+            }
+        }
+    }
 }
 
 void Game::placeLetter(wchar_t ch)
@@ -345,12 +458,59 @@ void Game::placeLetter(wchar_t ch)
 
 void Game::placeTile(wchar_t ch, int x, int y)
 {
-    tiles[y][x].set(ch);
+    if (tiles[y][x].modified)
+        undoTile(x, y);
+    if (!tiles[y][x].empty())
+        return;
+    if (currentPlayer->hasLetter(ch)) {
+        tiles[y][x].set(ch);
+        currentPlayer->markLetterAsUsed(ch);
+        countScore();
+    }
 }
 
 void Game::undoTile()
 {
-    tiles[cursor.getY()][cursor.getX()].undo();
+    undoTile(cursor.getX(), cursor.getY());
+}
+
+void Game::undoTile(int x, int y)
+{
+    if (tiles[y][x].modified) {
+        currentPlayer->markLetterAsUnused(tiles[y][x].get());
+        tiles[y][x].undo();
+        countScore();
+    }
+}
+
+void Game::undoAll()
+{
+    for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
+        for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
+            undoTile(j, i);
+        }
+    }
+}
+
+void Game::paintScoreDelta()
+{
+    wchar_t display[4] = {};
+    ConsoleColor color(PINK, DARK_PINK);
+    int sdcp = scoreDelta;
+    display[2] = *digitToWStr(sdcp%10);
+
+    sdcp /= 10;
+    if (sdcp)
+        display[1] = *digitToWStr(sdcp%10);
+    else
+        display[1] = L':';
+
+    sdcp /= 10;
+    if (sdcp)
+        display[0] = *digitToWStr(sdcp%10);
+    else
+        display[0] = L':';
+    boardWidget.setString(17,8,display,color,true);
 }
 
 void Game::nextPlayer()
@@ -360,6 +520,21 @@ void Game::nextPlayer()
     if (currentPlayer == players.end())
         currentPlayer = players.begin();
     currentPlayer->activate();
+    scoreDelta = 0;
+}
+
+void Game::updateLettersWidget()
+{
+    int lc = currentPlayer->letterCount();
+    for (int i = 0; i < lc; i++) {
+        auto lState = (*currentPlayer)[i];
+        wchar_t letter = lState.first;
+        if (lState.second)
+            lettersWidget.setLetter(1, 2*i, letter, ConsoleColor(TEAL,GREY));
+        else
+            lettersWidget.setLetter(1, 2*i, letter, ConsoleColor(BLACK,GREY));
+        lettersWidget.setString(2, 2*i, digitToWStr(letterValue[lState.first]), ConsoleColor(DARK_GREY,GREY));
+    }
 }
 
 void Game::updateScoreboard()
@@ -369,7 +544,7 @@ void Game::updateScoreboard()
     auto it = players.begin();
     for (int i = 2; it != players.end(); ++it, i+=2) {
         CCOLOR pColor;
-        wchar_t buff[8] = {};
+        wchar_t buff[8] = {}; // score string buffer
         swprintf(buff, L"%d", it->getScore());
         if (it->isActive())
             pColor = activeColor;
