@@ -6,6 +6,7 @@ Simple Scrabble game in console window made with WinAPI
 1. Extract the files
 1. Remove and/or change player names in *players.txt* file
 1. Launch the game
+1. Change your console font to "Raster fonts" 12x16
 1. Enjoy!
 
 ## Controls
