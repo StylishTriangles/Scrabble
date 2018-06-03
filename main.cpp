@@ -26,14 +26,17 @@ int main()
             goto RUNGAME;
         } else if (playerCount > 4) {
             printf("You don't have that many friends mate.\n");
+            Sleep(1000); // Mock player before exiting
             return 0;
         } else {
             printf("Very funny.\n");
+            Sleep(1000);
             return 0;
         }
 
     } else {
         ReadFile(hout,buffer,127,&charsRead,NULL);
+        CloseHandle(hout);
         int ix = 0;
         int dx = 0;
         for (unsigned i = 0; i < charsRead; i++) {
@@ -51,6 +54,8 @@ int main()
         playerCount = min(4,ix);
         if (playerCount == 0) {
             printf("Read 0 lines, players.txt is not formatted correctly.\n");
+            Sleep(1000);
+            return 0;
         }
     }
 
