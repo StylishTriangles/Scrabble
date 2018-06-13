@@ -15,4 +15,5 @@ Simple Scrabble game in console window made with WinAPI
 * Place blanks with *Spacebar*
 * Remove tiles with *Backspace*
 * Remove all placed tiles with *RALT + Backspace*
-* Confirm tile placement by pressing *Enter*
+* Remove tiles from hand by pressing *DEL* and typing the letters you want removed
+* Confirm tile placement/removal by pressing *Enter*

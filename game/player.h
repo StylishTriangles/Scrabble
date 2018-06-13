@@ -5,6 +5,9 @@
 
 #include "letterbag.h"
 
+#define LETTER_USED        0x1
+#define LETTER_DISCARDED   0x2
+
 class Player
 {
 public:
@@ -17,6 +20,10 @@ public:
     bool markLetterAsUsed(wchar_t letter);  // returns true if letter was successfully marked
     bool markLetterAsUnused(wchar_t letter);// returns true if letter was successfully unmarked
     void removeUsedLetters();
+    bool markLetterAsDiscarded(wchar_t letter);
+    bool markLetterAsKept(wchar_t letter);
+    void discardLetters(LetterBag* bag); // discard marked letters and put them into bag
+    void keepLetters(); // don't discard letters
     int letterCount() const;
     void addScore(int amount) {score += amount;}
     const int& getScore() const {return score;}
@@ -27,10 +34,10 @@ public:
     const wchar_t* name() const {return myName;}
     void name(const wchar_t* name) {myName = name;} // wordplay setter
 
-    const std::pair<wchar_t, bool> &operator [] (int letterNumber) const; // make it easy to iterate over letters
+    const std::pair<wchar_t, int> &operator [] (int letterNumber) const; // make it easy to iterate over letters
 
 private:
-    std::vector< std::pair<wchar_t,bool> > ownedLetters;
+    std::vector< std::pair<wchar_t,int> > ownedLetters;
     const wchar_t *myName;
     bool active;
     int score;

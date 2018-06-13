@@ -50,8 +50,8 @@ void Player::takeLetters(LetterBag *bag, int limit)
 bool Player::markLetterAsUsed(wchar_t letter)
 {
     for (auto &wc: ownedLetters) {
-        if (wc.first == letter and wc.second == 0) {
-            wc.second = true;
+        if (wc.first == letter and !(wc.second & LETTER_USED)) {
+            wc.second |= LETTER_USED;
             return true;
         }
     }
@@ -61,8 +61,8 @@ bool Player::markLetterAsUsed(wchar_t letter)
 bool Player::markLetterAsUnused(wchar_t letter)
 {
     for (auto it = ownedLetters.rbegin(); it != ownedLetters.rend(); ++it) {
-        if (it->first == letter and it->second == true) {
-            it->second = false;
+        if (it->first == letter and (it->second & LETTER_USED)) {
+            it->second ^= LETTER_USED;
             return true;
         }
     }
@@ -76,9 +76,54 @@ void Player::removeUsedLetters()
     auto it = ownedLetters.cend();
     do {
         --it;
-        if (it->second)
+        if (it->second & LETTER_USED)
             ownedLetters.erase(it);
     } while (it != ownedLetters.cbegin());
+}
+
+bool Player::markLetterAsDiscarded(wchar_t letter)
+{
+    for (auto &wc: ownedLetters) {
+        if (wc.first == letter and !(wc.second & LETTER_DISCARDED)) {
+            wc.second |= LETTER_DISCARDED;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Player::markLetterAsKept(wchar_t letter)
+{
+    for (auto it = ownedLetters.rbegin(); it != ownedLetters.rend(); ++it) {
+        if (it->first == letter and (it->second & LETTER_DISCARDED)) {
+            it->second ^= LETTER_DISCARDED;
+            return true;
+        }
+    }
+    return false;
+}
+
+void Player::discardLetters(LetterBag *bag)
+{
+    if (ownedLetters.cbegin() == ownedLetters.cend())
+        return;
+    auto it = ownedLetters.cend();
+    do {
+        --it;
+        if (it->second & LETTER_DISCARDED) {
+            bag->insert(it->first);
+            ownedLetters.erase(it);
+        }
+    } while (it != ownedLetters.cbegin());
+}
+
+void Player::keepLetters()
+{
+    for (int i = 0; i < letterCount(); i++) {
+        if (ownedLetters[i].second & LETTER_DISCARDED) {
+            ownedLetters[i].second ^= LETTER_DISCARDED;
+        }
+    }
 }
 
 int Player::letterCount() const
@@ -86,7 +131,7 @@ int Player::letterCount() const
     return ownedLetters.size();
 }
 
-const std::pair<wchar_t,bool> &Player::operator [](int letterNumber) const
+const std::pair<wchar_t, int> &Player::operator [](int letterNumber) const
 {
     return ownedLetters[letterNumber];
 }
