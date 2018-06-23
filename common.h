@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 #include <cinttypes>
-#include <Windows.h>
+#include <windows.h>
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -13,7 +13,7 @@ typedef uint32_t uint32;
 typedef uint64_t uint64;
 
 struct MyRectangle {
-    MyRectangle(int x, int y, int width, int height) :
+    MyRectangle(int16 x, int16 y, int16 width, int16 height) :
         x(x), y(y), w(width), h(height) {}
     int16 x, y;
     int16 w, h;

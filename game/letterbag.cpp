@@ -3,7 +3,7 @@
 #include <ctime>
 
 LetterBag::LetterBag(std::initializer_list<std::pair<wchar_t, int> > init) :
-    rng(time(NULL))
+    rng(unsigned(time(nullptr)))
 {
     constructBag(init);
     shuffle();
@@ -11,7 +11,7 @@ LetterBag::LetterBag(std::initializer_list<std::pair<wchar_t, int> > init) :
 
 void LetterBag::shuffle()
 {
-    auto rf = [this](int lim) {
+    auto rf = [this](unsigned lim) {
         return rng()%lim;
     };
     std::random_shuffle(bag.begin(), bag.end(), rf);
@@ -36,7 +36,7 @@ wchar_t LetterBag::pop()
 
 void LetterBag::insert(wchar_t letter)
 {
-    int pos = rng() % bag.size();
+    int pos = int(rng() % bag.size());
     bag.insert(bag.begin()+pos, letter);
 }
 

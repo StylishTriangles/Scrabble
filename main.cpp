@@ -1,11 +1,11 @@
 #include <cstdio>
-#include <Windows.h>
+#include <windows.h>
 
 #include "console/widget.h"
 #include "game/game.h"
 using namespace std;
 
-wchar_t playerNames[4][128] = {
+static wchar_t playerNames[4][128] = {
     L"Ptak",
     L"Torvalds",
     L"Gates",
@@ -18,7 +18,7 @@ int main()
     DWORD charsRead;
     char buffer[128];
     int playerCount = 2;
-    HANDLE hout = CreateFileW(L"players.txt",GENERIC_READ,0,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,0);
+    HANDLE hout = CreateFileW(L"players.txt",GENERIC_READ,0,nullptr,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,nullptr);
     if (hout == INVALID_HANDLE_VALUE) {
         printf("players.txt not found!\nHow many players want to play: ");
         scanf("%d", &playerCount);
@@ -35,7 +35,7 @@ int main()
         }
 
     } else {
-        ReadFile(hout,buffer,127,&charsRead,NULL);
+        ReadFile(hout,buffer,127,&charsRead,nullptr);
         CloseHandle(hout);
         int ix = 0;
         int dx = 0;
@@ -48,7 +48,7 @@ int main()
             } if (buffer[i] == '\r') {
                 continue;
             }
-            playerNames[ix][dx] = buffer[i];
+            playerNames[ix][dx] = wchar_t(buffer[i]);
             dx++;
         }
         playerCount = min(4,ix);

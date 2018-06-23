@@ -12,7 +12,7 @@ void ConsoleColor::swapColors()
     std::swap(fg, bg);
 }
 
-ConsoleColor::operator SHORT() const
+ConsoleColor::operator WORD() const
 {
-    return (SHORT)((bg<<4)+fg);
+    return WORD((bg<<4)+fg);
 }

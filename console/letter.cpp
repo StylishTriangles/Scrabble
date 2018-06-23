@@ -2,7 +2,7 @@
 #include <cstdio>
 
 Letter::Letter(char c, ConsoleColor col) :
-    c(c), col(col)
+    c(wchar_t(c)), col(col)
 {
 
 }
@@ -18,7 +18,7 @@ void Letter::display(HANDLE outputHandle) const
     SetConsoleTextAttribute(outputHandle, col);
 //    putwc(c, stdout);
     DWORD throwaway;
-    WriteConsoleW(outputHandle, &c, 1, &throwaway, NULL);
+    WriteConsoleW(outputHandle, &c, 1, &throwaway, nullptr);
 }
 
 wchar_t Letter::character() const

@@ -20,7 +20,7 @@ const wchar_t *digitToWStr(unsigned d)
 void strToWStr(wchar_t *out, const char *in)
 {
     while (*in) {
-        *out = *in;
+        *out = wchar_t(*in);
         ++in;
         ++out;
     }

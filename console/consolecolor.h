@@ -1,6 +1,6 @@
 #ifndef CONSOLECOLOR_H
 #define CONSOLECOLOR_H
-#include <Windows.h>
+#include <windows.h>
 
 enum CCOLOR {
     BLACK       = 0x0,
@@ -30,7 +30,7 @@ public:
     void setBackground(CCOLOR c) {bg = c;}
     void setForeground(CCOLOR c) {fg = c;}
 
-    operator SHORT() const;
+    operator WORD() const;
 private:
     CCOLOR fg, bg;
 };

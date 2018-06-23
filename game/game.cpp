@@ -118,7 +118,7 @@ void Game::keyPressEvent(KeyEvent *e)
                 }
             }
         } else {
-            placeLetter(key);
+            placeLetter(wchar_t(key));
         }
     } else if (key == VK_SPACE) {
         placeLetter(SCRABBLE_BLANK);
@@ -216,8 +216,8 @@ void Game::setupBoard()
             " D   t   t   D "
             "T  d   T   d  T";
     const int N = SCRABBLE_BOARD_SIZE;
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
+    for (unsigned i = 0; i < N; i++) {
+        for (unsigned j = 0; j < N; j++) {
             if (sboard[N*i+j] == 'T')
                 tiles[i][j].setBonus(BONUS_TRIPLE_WORD);
             else if (sboard[N*i+j] == 'D')
@@ -325,8 +325,8 @@ void Game::generateLetterValues()
 
 void Game::paintTiles()
 {
-    for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
-        for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
+    for (unsigned i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
+        for (unsigned j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
             CCOLOR textColor = GREY;
             CCOLOR bgColor = BLACK;
             // Set background color if tile is a bonus tile
@@ -348,7 +348,7 @@ void Game::paintTiles()
                 textColor = TEAL;
 
             // Apply colors to widget letters
-            boardWidget.setLetter(i, j, Letter(tiles[i][j].get(),
+            boardWidget.setLetter(int(i), int(j), Letter(tiles[i][j].get(),
                                                ConsoleColor(textColor, bgColor)));
         }
     }
@@ -384,8 +384,8 @@ void Game::commitTiles()
     countScore();
     currentPlayer->addScore(scoreDelta);
 
-    for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++)
-        for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++)
+    for (unsigned i = 0; i < SCRABBLE_BOARD_SIZE; i++)
+        for (unsigned j = 0; j < SCRABBLE_BOARD_SIZE; j++)
             tiles[i][j].commit(); // It is safe to commit already commited tiles
 }
 
@@ -393,12 +393,12 @@ void Game::countScore()
 {
     scoreDelta = 0;
     int placedTiles = 0;
-    for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
+    for (unsigned i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
         int score = 0;
         int ok = 0;
         int count = 0;
         int wordMult = 1;
-        for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
+        for (unsigned j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
             if (!tiles[i][j].empty()) {
                 uint16 bonus = tiles[i][j].getBonus();
                 int letterMult = 1;
@@ -428,12 +428,12 @@ void Game::countScore()
     }
     // Same as above but the axes are swapped
     placedTiles = 0;
-    for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
+    for (unsigned j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
         int score = 0;
         int ok = 0;
         int count = 0;
         int wordMult = 1;
-        for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
+        for (unsigned i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
             if (!tiles[i][j].empty()) {
                 uint16 bonus = tiles[i][j].getBonus();
                 int letterMult = 1;
@@ -471,11 +471,11 @@ void Game::placeLetter(wchar_t ch)
     if (removeMode) {
         currentPlayer->markLetterAsDiscarded(ch);
     } else {
-        placeTile(ch, cursor.getX(), cursor.getY());
+        placeTile(ch, unsigned(cursor.getX()), unsigned(cursor.getY()));
     }
 }
 
-void Game::placeTile(wchar_t ch, int x, int y)
+void Game::placeTile(wchar_t ch, unsigned x, unsigned y)
 {
     if (tiles[y][x].modified)
         undoTile(x, y);
@@ -490,10 +490,10 @@ void Game::placeTile(wchar_t ch, int x, int y)
 
 void Game::undoTile()
 {
-    undoTile(cursor.getX(), cursor.getY());
+    undoTile(unsigned(cursor.getX()), unsigned(cursor.getY()));
 }
 
-void Game::undoTile(int x, int y)
+void Game::undoTile(unsigned x, unsigned y)
 {
     if (tiles[y][x].modified) {
         currentPlayer->markLetterAsUnused(tiles[y][x].get());
@@ -508,8 +508,8 @@ void Game::undoAll()
         currentPlayer->keepLetters();
         return;
     }
-    for (int i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
-        for (int j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
+    for (unsigned i = 0; i < SCRABBLE_BOARD_SIZE; i++) {
+        for (unsigned j = 0; j < SCRABBLE_BOARD_SIZE; j++) {
             undoTile(j, i);
         }
     }
@@ -538,6 +538,7 @@ void Game::paintScoreDelta()
 
 void Game::nextPlayer()
 {
+    removeMode = 0;
     currentPlayer->deactivate();
     ++currentPlayer;
     if (currentPlayer == players.end())
@@ -548,9 +549,9 @@ void Game::nextPlayer()
 
 void Game::updateLettersWidget()
 {
-    int lc = currentPlayer->letterCount();
+    int lc = int(currentPlayer->letterCount());
     for (int i = 0; i < lc; i++) {
-        auto lState = (*currentPlayer)[i];
+        auto lState = (*currentPlayer)[unsigned(i)];
         wchar_t letter = lState.first;
         if (lState.second == LETTER_USED)
             lettersWidget.setLetter(1, 2*i, letter, ConsoleColor(TEAL,GREY));
@@ -558,7 +559,8 @@ void Game::updateLettersWidget()
             lettersWidget.setLetter(1, 2*i, letter, ConsoleColor(RED,GREY));
         else
             lettersWidget.setLetter(1, 2*i, letter, ConsoleColor(BLACK,GREY));
-        lettersWidget.setString(2, 2*i, digitToWStr(letterValue[lState.first]), ConsoleColor(DARK_GREY,GREY));
+        lettersWidget.setString(2, 2*i, digitToWStr(unsigned(letterValue[lState.first])),
+                                                    ConsoleColor(DARK_GREY,GREY));
     }
 }
 

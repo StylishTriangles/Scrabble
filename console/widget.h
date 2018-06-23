@@ -1,6 +1,6 @@
 #ifndef WIDGET_H
 #define WIDGET_H
-#include <Windows.h>
+#include <windows.h>
 #include <vector>
 #include <set>
 
@@ -14,13 +14,13 @@ public:
     Widget(Widget* parent = nullptr);
     void move(int x, int y);
     void display(HANDLE outputHandle);
-    void resize(int w, int h);
+    void resize(int16 w, int16 h);
     void setLetter(int relativeY, int relativeX, Letter l, bool paintOnBorder = false);
     void setLetter(int relativeY, int relativeX, wchar_t l, ConsoleColor col = ConsoleColor(), bool paintOnBorder = false);
     void setString(int relativeY, int relativeX, const wchar_t* cwstr,
                    ConsoleColor col = ConsoleColor(), bool paintOnBorder = false);
     void setBackgroundColor(CCOLOR c);
-    void setBorder(Letter l, int16 width = 1);
+    void setBorder(Letter l, uint16 width = 1);
     void clearBorder(ConsoleColor color = ConsoleColor());
 
     void addChild(Widget* w);
@@ -40,7 +40,7 @@ public:
     };
 
 private:
-    void resizeScreen(int w, int h);
+    void resizeScreen(int16 w, int16 h);
 
     Widget* parent;
     std::set< Widget*, compareID> children;
@@ -49,7 +49,7 @@ private:
     MyRectangle location;
     std::vector< std::vector<Letter> > screen;
     Letter borderLetter;
-    int16 borderWidth;
+    uint16 borderWidth;
 
     Cursor* cursor;
     bool cursorEnabled;

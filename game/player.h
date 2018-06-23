@@ -16,7 +16,7 @@ public:
     bool hasLetter(wchar_t l) const;
     void insertLetter(wchar_t l);
     void removeLetter(wchar_t l);
-    void takeLetters(LetterBag* bag, int limit); // player will take as much letters as possible withoud exeeding limit
+    void takeLetters(LetterBag* bag, unsigned limit); // player will take as much letters as possible withoud exeeding limit
     bool markLetterAsUsed(wchar_t letter);  // returns true if letter was successfully marked
     bool markLetterAsUnused(wchar_t letter);// returns true if letter was successfully unmarked
     void removeUsedLetters();
@@ -24,7 +24,7 @@ public:
     bool markLetterAsKept(wchar_t letter);
     void discardLetters(LetterBag* bag); // discard marked letters and put them into bag
     void keepLetters(); // don't discard letters
-    int letterCount() const;
+    unsigned letterCount() const;
     void addScore(int amount) {score += amount;}
     const int& getScore() const {return score;}
     bool isActive() const {return active;}
@@ -34,7 +34,7 @@ public:
     const wchar_t* name() const {return myName;}
     void name(const wchar_t* name) {myName = name;} // wordplay setter
 
-    const std::pair<wchar_t, int> &operator [] (int letterNumber) const; // make it easy to iterate over letters
+    const std::pair<wchar_t, int> &operator [] (unsigned letterNumber) const; // make it easy to iterate over letters
 
 private:
     std::vector< std::pair<wchar_t,int> > ownedLetters;

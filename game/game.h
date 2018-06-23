@@ -2,7 +2,7 @@
 #define GAME_H
 #include <list>
 #include <map>
-#include <Windows.h>
+#include <windows.h>
 
 #include "common.h"
 #include "console/consolecolor.h"
@@ -46,9 +46,9 @@ private:
     void commitTiles();
     void countScore();
     void placeLetter(wchar_t ch);
-    void placeTile(wchar_t ch, int x, int y);
+    void placeTile(wchar_t ch, unsigned x, unsigned y);
     void undoTile();
-    void undoTile(int x, int y);
+    void undoTile(unsigned x, unsigned y);
     void undoAll();
     void paintScoreDelta();
 

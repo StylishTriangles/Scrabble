@@ -1,6 +1,6 @@
 #include "eventmanager.h"
 #ifdef WIN32
-#include <Windows.h>
+#include <windows.h>
 #else
 #error Non Windows EventManager has not been implemented yet.
 #endif
@@ -75,15 +75,15 @@ void EventManager::scanEvents()
         // keyboard events
 #ifdef WIN32
         for (int i = 8; i < 0xFF; i++) { // start from 8 to skip mouse buttons
-            bool ks = ((unsigned short)GetKeyState(i))&(1<<15);
+            bool ks = static_cast<unsigned short>(GetKeyState(i))&(1<<15);
             if (ks & !keyState[i]) {
                 eqLock.lock();
-                eq.push(new KeyEvent(KeyPress, (short)i));
+                eq.push(new KeyEvent(KeyPress, short(i)));
                 eqLock.unlock();
             }
             else if (!ks & keyState[i]) {
                 eqLock.lock();
-                eq.push(new KeyEvent(KeyRelease, (short)i));
+                eq.push(new KeyEvent(KeyRelease, short(i)));
                 eqLock.unlock();
             }
             keyState[i] = ks;

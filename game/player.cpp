@@ -41,7 +41,7 @@ void Player::removeLetter(wchar_t l)
     }
 }
 
-void Player::takeLetters(LetterBag *bag, int limit)
+void Player::takeLetters(LetterBag *bag, unsigned limit)
 {
     while (!bag->empty() and letterCount() < limit)
         insertLetter(bag->pop());
@@ -119,19 +119,19 @@ void Player::discardLetters(LetterBag *bag)
 
 void Player::keepLetters()
 {
-    for (int i = 0; i < letterCount(); i++) {
+    for (unsigned i = 0; i < letterCount(); i++) {
         if (ownedLetters[i].second & LETTER_DISCARDED) {
             ownedLetters[i].second ^= LETTER_DISCARDED;
         }
     }
 }
 
-int Player::letterCount() const
+unsigned Player::letterCount() const
 {
     return ownedLetters.size();
 }
 
-const std::pair<wchar_t, int> &Player::operator [](int letterNumber) const
+const std::pair<wchar_t, int> &Player::operator [](unsigned letterNumber) const
 {
     return ownedLetters[letterNumber];
 }

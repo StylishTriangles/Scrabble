@@ -17,8 +17,8 @@ void Widget::move(int x, int y)
         cursor->addX(x - location.x);
         cursor->addY(y - location.y);
     }
-    location.x = x;
-    location.y = y;
+    location.x = int16(x);
+    location.y = int16(y);
 }
 
 void Widget::display(HANDLE outputHandle)
@@ -26,32 +26,32 @@ void Widget::display(HANDLE outputHandle)
     Letter cpy;
     COORD cursorPos;
     if (cursorEnabled and cursor != nullptr) {
-        cursorPos = {(SHORT)(cursor->getX()+borderWidth),
-                     (SHORT)(cursor->getY()+borderWidth)};
+        cursorPos = {SHORT(cursor->getX()+borderWidth),
+                     SHORT(cursor->getY()+borderWidth)};
         SetConsoleCursorPosition(outputHandle, cursorPos);
         // backup symbol under cursor
-        cpy = Letter(screen[cursorPos.Y][cursorPos.X]);
+        cpy = Letter(screen[unsigned(cursorPos.Y)][unsigned(cursorPos.X)]);
         // modify symbol
-        screen[cursorPos.Y][cursorPos.X].color().swapColors();
+        screen[unsigned(cursorPos.Y)][unsigned(cursorPos.X)].color().swapColors();
     }
     COORD pos = makeCOORD(location.x, location.y);
     while (pos.Y < location.y + location.h) {
         SetConsoleCursorPosition(outputHandle, pos);
-        for (const Letter &l: screen[pos.Y-location.y]) {
+        for (const Letter &l: screen[unsigned(pos.Y-location.y)]) {
             l.display(outputHandle);
         }
         pos.Y++;
     }
     if (cursorEnabled and cursor != nullptr) {
         // restore symbol under cursor
-        screen[cursorPos.Y][cursorPos.X] = cpy;
+        screen[unsigned(cursorPos.Y)][unsigned(cursorPos.X)] = cpy;
     }
 
 }
 
-void Widget::resize(int w, int h)
+void Widget::resize(int16 w, int16 h)
 {
-    int16 oldBW = borderWidth;
+    uint16 oldBW = borderWidth;
     clearBorder();
     resizeScreen(w, h);
     setBorder(borderLetter, oldBW);
@@ -63,7 +63,7 @@ void Widget::setLetter(int relativeY, int relativeX, Letter l, bool paintOnBorde
         relativeX += borderWidth;
         relativeY += borderWidth;
     }
-    screen[relativeY][relativeX] = l;
+    screen[unsigned(relativeY)][unsigned(relativeX)] = l;
 }
 
 void Widget::setLetter(int relativeY, int relativeX, wchar_t l, ConsoleColor col, bool paintOnBorder)
@@ -95,7 +95,7 @@ void Widget::setString(int relativeY, int relativeX, const wchar_t *cwstr, Conso
         if (relativeY >= maxY) {
             return;
         }
-        screen[relativeY][relativeX] = Letter(*cwstr, col);
+        screen[unsigned(relativeY)][unsigned(relativeX)] = Letter(*cwstr, col);
         ++relativeX;
         ++cwstr;
     }
@@ -103,27 +103,27 @@ void Widget::setString(int relativeY, int relativeX, const wchar_t *cwstr, Conso
 
 void Widget::setBackgroundColor(CCOLOR c)
 {
-    for (int i = borderWidth; i < height() - borderWidth; i++) {
-        for (int j = borderWidth; j < width() - borderWidth; j++) {
+    for (unsigned i = borderWidth; i < unsigned(height()) - borderWidth; i++) {
+        for (unsigned j = borderWidth; j < unsigned(width()) - borderWidth; j++) {
             screen[i][j].color().setBackground(c);
         }
     }
 }
 
-void Widget::setBorder(Letter l, int16 width)
+void Widget::setBorder(Letter l, uint16 width)
 {
     borderLetter = l;
     borderWidth = width;
-    for (int i = 0; i < std::min(width, this->height()); i++) {
-        for (int j = 0; j < this->width(); j++) {
+    for (unsigned i = 0; i < std::min(width, uint16(this->height())); i++) {
+        for (unsigned j = 0; j < unsigned(this->width()); j++) {
             screen[i][j] = l;
-            screen[this->height()-i-1][j] = l;
+            screen[unsigned(this->height())-i-1][j] = l;
         }
     }
-    for (int i = 0; i < std::min(width, this->width()); i++) {
-        for (int j = 0; j < this->height(); j++) {
+    for (unsigned i = 0; i < std::min(width, uint16(this->width())); i++) {
+        for (unsigned j = 0; j < unsigned(this->height()); j++) {
             screen[j][i] = l;
-            screen[j][this->width()-i-1] = l;
+            screen[j][unsigned(this->width())-i-1] = l;
         }
     }
 }
@@ -139,12 +139,12 @@ void Widget::setCursor(Cursor *c)
     cursor = c;
 }
 
-void Widget::resizeScreen(int w, int h)
+void Widget::resizeScreen(int16 w, int16 h)
 {
     location.w = w;
     location.h = h;
-    screen.resize(h);
+    screen.resize(uint32(h));
     for (auto &line: screen) {
-        line.resize(w);
+        line.resize(uint32(w));
     }
 }
