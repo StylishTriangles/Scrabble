@@ -2,7 +2,7 @@
 #include <algorithm>
 
 Widget::Widget(Widget *parent) :
-    parent(parent), location(0,0,1,1), borderWidth(0), cursor(nullptr)
+    parent(parent), location(0,0,1,1), borderWidth(0), cursor(nullptr), cursorEnabled(false)
 {
     static int IDenum = 0;
     IDenum++;
@@ -136,6 +136,7 @@ void Widget::clearBorder(ConsoleColor color)
 
 void Widget::setCursor(Cursor *c)
 {
+    cursorEnabled = true;
     cursor = c;
 }
 
