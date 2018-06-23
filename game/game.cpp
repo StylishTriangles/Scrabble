@@ -553,6 +553,14 @@ void Game::nextPlayer()
 void Game::updateLettersWidget()
 {
     int lc = int(currentPlayer->letterCount());
+    static auto defBorderColor = lettersWidget.getBorderColor();
+    const auto rmBorderColor = ConsoleColor(RED,DARK_RED);
+    if (removeMode) {
+        if (lettersWidget.getBorderColor() != rmBorderColor)
+            lettersWidget.setBorderColor(rmBorderColor);
+    }
+    else if (lettersWidget.getBorderColor() != defBorderColor)
+        lettersWidget.setBorderColor(defBorderColor);
     for (int i = 0; i < lc; i++) {
         auto lState = (*currentPlayer)[unsigned(i)];
         wchar_t letter = lState.first;

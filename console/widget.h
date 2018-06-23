@@ -21,6 +21,8 @@ public:
                    ConsoleColor col = ConsoleColor(), bool paintOnBorder = false);
     void setBackgroundColor(CCOLOR c);
     void setBorder(Letter l, uint16 width = 1);
+    ConsoleColor getBorderColor() const {return borderLetter.color();}
+    void setBorderColor(ConsoleColor col);
     void clearBorder(ConsoleColor color = ConsoleColor());
 
     void addChild(Widget* w);
@@ -43,7 +45,7 @@ private:
     void resizeScreen(int16 w, int16 h);
 
     Widget* parent;
-    std::set< Widget*, compareID> children;
+    std::set< Widget*, compareID > children;
     int ID;
 
     MyRectangle location;

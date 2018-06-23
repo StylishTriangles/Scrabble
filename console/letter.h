@@ -13,6 +13,7 @@ public:
     wchar_t character() const;
     ConsoleColor const& color() const {return col;}
     ConsoleColor& color() {return col;}
+    void setColor(ConsoleColor color) {col = color;}
     void display(HANDLE outputHandle) const;
 private:
     wchar_t c;

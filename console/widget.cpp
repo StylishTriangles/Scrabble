@@ -128,6 +128,23 @@ void Widget::setBorder(Letter l, uint16 width)
     }
 }
 
+void Widget::setBorderColor(ConsoleColor col)
+{
+    borderLetter.setColor(col);
+    for (unsigned i = 0; i < std::min(borderWidth, uint16(this->height())); i++) {
+        for (unsigned j = 0; j < unsigned(this->width()); j++) {
+            screen[i][j].setColor(col);
+            screen[unsigned(this->height())-i-1][j].setColor(col);
+        }
+    }
+    for (unsigned i = 0; i < std::min(borderWidth, uint16(this->width())); i++) {
+        for (unsigned j = 0; j < unsigned(this->height()); j++) {
+            screen[j][i].setColor(col);
+            screen[j][unsigned(this->width())-i-1].setColor(col);
+        }
+    }
+}
+
 void Widget::clearBorder(ConsoleColor color)
 {
     setBorder(Letter(' ', color), borderWidth);
