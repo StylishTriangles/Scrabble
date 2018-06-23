@@ -1,9 +1,9 @@
 #include "cursor.h"
 
-Cursor::Cursor()
-{
-
-}
+Cursor::Cursor() :
+    x(0),
+    y(0)
+{}
 
 void Cursor::setPos(int x, int y)
 {

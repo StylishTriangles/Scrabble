@@ -2,7 +2,7 @@
 #include <algorithm>
 
 Widget::Widget(Widget *parent) :
-    parent(parent), location(0,0,1,1), borderWidth(0)
+    parent(parent), location(0,0,1,1), borderWidth(0), cursor(nullptr)
 {
     static int IDenum = 0;
     IDenum++;
