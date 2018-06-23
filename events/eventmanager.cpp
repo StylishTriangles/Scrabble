@@ -9,6 +9,8 @@ std::queue<Event*> EventManager::eq;
 std::mutex EventManager::eqLock;
 std::multimap<EventType, std::function< void(Event*) > > EventManager::cbs;
 std::mutex EventManager::cbsLock;
+std::map<int, ETimer* > EventManager::timers;
+std::mutex EventManager::timersLock;
 std::atomic<bool> EventManager::started;
 std::atomic<bool> EventManager::terminate;
 std::thread *EventManager::io;
@@ -21,8 +23,26 @@ void EventManager::connect(EventType et, std::function< void(Event *) > callback
     cbsLock.unlock();
 }
 
+int EventManager::newTimer(std::chrono::milliseconds dT, std::function<void (TimerEvent *)> callback)
+{
+    ETimer *t = new ETimer(dT);
+    int tID = t->getID();
+    auto wrapper = [callback, tID](Event* e){
+        TimerEvent *e2 = dynamic_cast<TimerEvent *>(e);
+        if (tID == e2->timerID()) callback(e2); // only exec when timerID matches this timer's id
+    };
+    timersLock.lock();
+    timers.insert(std::make_pair(tID, t));
+    timersLock.unlock();
+    cbsLock.lock();
+    cbs.insert({EventType::Timer, wrapper});
+    cbsLock.unlock();
+    return tID;
+}
+
 void EventManager::pollEvents()
 {
+    threadManager.lock();
     eqLock.lock();
     cbsLock.lock();
     while (!eq.empty()) {
@@ -35,6 +55,7 @@ void EventManager::pollEvents()
     }
     cbsLock.unlock();
     eqLock.unlock();
+    threadManager.unlock();
 }
 
 void EventManager::start()
@@ -65,6 +86,7 @@ void EventManager::stop()
     io->join();
     delete io;
     started.store(false);
+    cleanup();
     threadManager.unlock();
 }
 
@@ -89,5 +111,35 @@ void EventManager::scanEvents()
             keyState[i] = ks;
         }
 #endif
+        // Timer events
+        auto now = std::chrono::system_clock::now();
+        timersLock.lock();
+        for (auto & it: timers) {
+            if (it.second->test(now)) {
+                eqLock.lock();
+                eq.push(new TimerEvent(Timer, it.second->getID()));
+                eqLock.unlock();
+            }
+        }
+        timersLock.unlock();
     }
+}
+
+void EventManager::cleanup()
+{
+    eqLock.lock();
+    cbsLock.lock();
+    timersLock.lock();
+    while (!eq.empty()) {
+        delete eq.front();
+        eq.pop();
+    }
+    cbs.clear();
+    for (auto & it: timers) {
+        delete it.second;
+    }
+    timers.clear();
+    eqLock.unlock();
+    cbsLock.unlock();
+    timersLock.unlock();
 }

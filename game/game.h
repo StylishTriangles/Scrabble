@@ -33,6 +33,8 @@ public:
     void keyPressEvent(KeyEvent* e);
     void keyReleaseEvent(KeyEvent* e);
 
+    void disableSeizureMode();
+
 private:
     void bindEvents();
     void setupWidgets();
@@ -40,7 +42,6 @@ private:
     void generateLetterValues();
     void paintTiles(); // paint tiles on widget
     void resetTickVars();
-    void disableSeizureMode();
 
     // game board control
     void commitTiles();

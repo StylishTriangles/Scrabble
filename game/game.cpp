@@ -132,6 +132,16 @@ void Game::keyReleaseEvent(KeyEvent *e)
         altDown = false;
 }
 
+void Game::disableSeizureMode()
+{
+    // Disable the annoying console cursor
+    CONSOLE_CURSOR_INFO cci;
+    GetConsoleCursorInfo(hStdOut, &cci);
+    cci.bVisible = false;
+    SetConsoleCursorInfo(hStdOut, &cci);
+    //boardWidget.toggleCursor();
+}
+
 void Game::bindEvents()
 {
     EventManager::connect(KeyPress, [this](Event* e) {
@@ -139,6 +149,9 @@ void Game::bindEvents()
     });
     EventManager::connect(KeyRelease, [this](Event* e) {
         keyReleaseEvent(dynamic_cast<KeyEvent*>(e));
+    });
+    EventManager::newTimer(std::chrono::milliseconds(1000), [this](TimerEvent*) {
+        disableSeizureMode();
     });
 }
 
@@ -357,16 +370,6 @@ void Game::paintTiles()
 void Game::resetTickVars()
 {
     commited = false;
-}
-
-void Game::disableSeizureMode()
-{
-    // Disable the annoying console cursor
-    CONSOLE_CURSOR_INFO cci;
-    GetConsoleCursorInfo(hStdOut, &cci);
-    cci.bVisible = false;
-    SetConsoleCursorInfo(hStdOut, &cci);
-    boardWidget.toggleCursor();
 }
 
 void Game::commitTiles()

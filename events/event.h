@@ -4,6 +4,7 @@
 enum EventType {
     KeyPress,
     KeyRelease,
+    Timer,
 };
 
 class Event
