@@ -18,7 +18,8 @@ SOURCES += \
     game/player.cpp \
     common.cpp \
     events/timerevent.cpp \
-    events/timer/etimer.cpp
+    events/timer/etimer.cpp \
+    game/rules/gamerule.cpp
 
 HEADERS += \
     console/consolecolor.h \
@@ -34,4 +35,5 @@ HEADERS += \
     events/event.h \
     game/player.h \
     events/timerevent.h \
-    events/timer/etimer.h
+    events/timer/etimer.h \
+    game/rules/gamerule.h
