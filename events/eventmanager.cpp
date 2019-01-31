@@ -16,6 +16,11 @@ std::atomic<bool> EventManager::terminate;
 std::thread *EventManager::io;
 std::mutex EventManager::threadManager;
 
+/**
+ *  @brief Register callback for a specific event type.
+ *  @param et: EventType to capture.
+ *	@param callback: callback to call when specified event happens.
+ **/
 void EventManager::connect(EventType et, std::function< void(Event *) > callback)
 {
     cbsLock.lock();
@@ -23,6 +28,11 @@ void EventManager::connect(EventType et, std::function< void(Event *) > callback
     cbsLock.unlock();
 }
 
+/**
+ *  @brief Register a new timer.
+ *  @param dT: Time delta between subsequent calls.
+ *	@param callback: Callback to call every dT milliseconds.
+ **/
 int EventManager::newTimer(std::chrono::milliseconds dT, std::function<void (TimerEvent *)> callback)
 {
     ETimer *t = new ETimer(dT);
@@ -40,6 +50,9 @@ int EventManager::newTimer(std::chrono::milliseconds dT, std::function<void (Tim
     return tID;
 }
 
+/**
+ *  @brief Execute callbacks for all events that happen since last call to this function.
+ **/
 void EventManager::pollEvents()
 {
     threadManager.lock();
@@ -58,6 +71,9 @@ void EventManager::pollEvents()
     threadManager.unlock();
 }
 
+/**
+ *  @brief Start the event manager.
+ **/
 void EventManager::start()
 {
     threadManager.lock();
@@ -74,6 +90,9 @@ void EventManager::start()
     threadManager.unlock();
 }
 
+/**
+ *  @brief Stop the event manager.
+ **/
 void EventManager::stop()
 {
     threadManager.lock();

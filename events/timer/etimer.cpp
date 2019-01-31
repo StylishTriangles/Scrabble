@@ -1,5 +1,9 @@
 #include "etimer.h"
 
+/**
+ *  @brief Construct ETimer object.
+ *	@param dT: delta time between timeouts.
+ **/
 ETimer::ETimer(std::chrono::milliseconds dT) :
     dT(dT), until(std::chrono::system_clock::now() + dT)
 {
