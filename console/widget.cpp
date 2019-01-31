@@ -1,6 +1,10 @@
 #include "widget.h"
 #include <algorithm>
 
+/**
+ *  The default Widget constructor.
+ *	@param parent: parent Widget.
+ **/
 Widget::Widget(Widget *parent) :
     parent(parent), location(0,0,1,1), borderWidth(0), cursor(nullptr), cursorEnabled(false)
 {
@@ -11,6 +15,11 @@ Widget::Widget(Widget *parent) :
     resizeScreen(1,1);
 }
 
+/**
+ *  Move widget to specified console coordinates.
+ *  @param x: New X-position.
+ *  @param y: New Y-position.
+ **/
 void Widget::move(int x, int y)
 {
     if (cursor) {
@@ -21,6 +30,10 @@ void Widget::move(int x, int y)
     location.y = int16(y);
 }
 
+/**
+ *  Display this widget.
+ *  @param outputHandle: device to output to specified by HANDLE (usually STANDARD_OUTPUT_HANDLE).
+ **/
 void Widget::display(HANDLE outputHandle)
 {
     Letter cpy;
@@ -49,6 +62,11 @@ void Widget::display(HANDLE outputHandle)
 
 }
 
+/**
+ *  Resize the widget.
+ *  @param w: New width.
+ *  @param h: New height.
+ **/
 void Widget::resize(int16 w, int16 h)
 {
     uint16 oldBW = borderWidth;
@@ -57,6 +75,13 @@ void Widget::resize(int16 w, int16 h)
     setBorder(borderLetter, oldBW);
 }
 
+/**
+ *  Set a letter on given coordinates.
+ *  @param relativeY: Y-coord relative to widget position (0 is the first non-border tile).
+ *  @param relativeX: X-coord relative to widget position (0 is the first non-border tile).
+ *  @param l: Object of type Letter to be printed on widget.
+ *  @param paintOnBorder: If switched to true the string can be painted on border. Provided coords will map to top left corner of widget.
+ **/
 void Widget::setLetter(int relativeY, int relativeX, Letter l, bool paintOnBorder)
 {
     if (!paintOnBorder) {
@@ -66,11 +91,27 @@ void Widget::setLetter(int relativeY, int relativeX, Letter l, bool paintOnBorde
     screen[unsigned(relativeY)][unsigned(relativeX)] = l;
 }
 
+/**
+ *  Set a letter on given coordinates.
+ *  @param relativeY: Y-coord relative to widget position (0 is the first non-border tile).
+ *  @param relativeX: X-coord relative to widget position (0 is the first non-border tile).
+ *  @param l: Character to be printed on widget.
+ *	@param col: Color of the character.
+ *  @param paintOnBorder: If switched to true the string can be painted on border. Provided coords will map to top left corner of widget.
+ **/
 void Widget::setLetter(int relativeY, int relativeX, wchar_t l, ConsoleColor col, bool paintOnBorder)
 {
     setLetter(relativeY, relativeX, Letter(l, col), paintOnBorder);
 }
 
+/**
+ *  Set a string on given coordinates.
+ *  @param relativeY: Y-coord relative to widget position (0 is the first non-border tile).
+ *  @param relativeX: X-coord relative to widget position (0 is the first non-border tile).
+ *  @param cwstr: String to be printed on widget.
+ *	@param col: Color of the string.
+ *  @param paintOnBorder: If switched to true the string can be painted on border. Provided coords will map to top left corner of widget.
+ **/
 void Widget::setString(int relativeY, int relativeX, const wchar_t *cwstr, ConsoleColor col, bool paintOnBorder)
 {
     int maxX = width();
@@ -101,6 +142,9 @@ void Widget::setString(int relativeY, int relativeX, const wchar_t *cwstr, Conso
     }
 }
 
+/**
+ *  Set color of the background, but not of the border.
+ **/
 void Widget::setBackgroundColor(CCOLOR c)
 {
     for (unsigned i = borderWidth; i < unsigned(height()) - borderWidth; i++) {
@@ -110,6 +154,11 @@ void Widget::setBackgroundColor(CCOLOR c)
     }
 }
 
+/**
+ *  Add border to widget.
+ *  @param l: Letter used in border painting.
+ *	@param width: Width of the border.
+ **/
 void Widget::setBorder(Letter l, uint16 width)
 {
     borderLetter = l;
@@ -128,6 +177,9 @@ void Widget::setBorder(Letter l, uint16 width)
     }
 }
 
+/**
+ *  Set border's color.
+ **/
 void Widget::setBorderColor(ConsoleColor col)
 {
     borderLetter.setColor(col);
@@ -145,12 +197,18 @@ void Widget::setBorderColor(ConsoleColor col)
     }
 }
 
+/**
+ *  Remove border from widget.
+ **/
 void Widget::clearBorder(ConsoleColor color)
 {
     setBorder(Letter(' ', color), borderWidth);
     borderWidth = 0;
 }
 
+/**
+ *  Set the cursor to be displayed on widget.
+ **/
 void Widget::setCursor(Cursor *c)
 {
     cursorEnabled = true;

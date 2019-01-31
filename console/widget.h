@@ -21,20 +21,20 @@ public:
                    ConsoleColor col = ConsoleColor(), bool paintOnBorder = false);
     void setBackgroundColor(CCOLOR c);
     void setBorder(Letter l, uint16 width = 1);
-    ConsoleColor getBorderColor() const {return borderLetter.color();}
+    ConsoleColor getBorderColor() const {return borderLetter.color();}  /*!< Return current border color. */
     void setBorderColor(ConsoleColor col);
     void clearBorder(ConsoleColor color = ConsoleColor());
 
-    void addChild(Widget* w);
+    void addChild(Widget* w);  /*!< Not yet implemented. */
     int getID() const {return ID;}
 
-    int16 width() const {return location.w;}
-    int16 height() const {return location.h;}
-    int16 canvasWidth() const {return location.w-borderWidth*2;}
-    int16 canvasHeight() const {return location.h-borderWidth*2;}
+    int16 width() const {return location.w;}  /*!< Return total widget width. */
+    int16 height() const {return location.h;}  /*!< Return total widget height. */
+    int16 canvasWidth() const {return location.w-borderWidth*2;}  /*!< Return paintable rectangle width. */
+    int16 canvasHeight() const {return location.h-borderWidth*2;}  /*!< Return paintable rectangle height. */
 
     void setCursor(Cursor* c);
-    void toggleCursor() {cursorEnabled^=1;}
+    void toggleCursor() {cursorEnabled^=1;}  /*!< Toggle cursor visibility. */
 
     class compareID
     {
