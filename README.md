@@ -17,3 +17,10 @@ Simple Scrabble game in console window made with WinAPI
 * Remove all placed tiles with *RALT + Backspace*
 * Remove tiles from hand by pressing *DEL* and typing the letters you want removed
 * Confirm tile placement/removal by pressing *Enter*
+
+## Screenshots
+![begin](https://raw.githubusercontent.com/StylishTriangles/Scrabble/master/!README_DATA/start.png)
+
+![placement](https://raw.githubusercontent.com/StylishTriangles/Scrabble/master/!README_DATA/placement.png)
+
+![placement2](https://raw.githubusercontent.com/StylishTriangles/Scrabble/master/!README_DATA/placement2.png)
