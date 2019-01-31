@@ -10,6 +10,9 @@
 
 #include "events/eventmanager.h"
 
+/**
+ *  The deafult Game constructor.
+ **/
 Game::Game() :
     hStdOut(GetStdHandle(STD_OUTPUT_HANDLE)),
     scoreDelta(0),
@@ -18,6 +21,9 @@ Game::Game() :
     letterBag.loadPolishScrabble();
 }
 
+/**
+ *  Start main event loop.
+ **/
 void Game::run()
 {
     // setup
@@ -56,6 +62,9 @@ void Game::run()
     }
 }
 
+/**
+ *  Call display on all member widgets.
+ **/
 void Game::repaint()
 {
     boardWidget.display(hStdOut);
@@ -64,11 +73,18 @@ void Game::repaint()
     lettersWidget.display(hStdOut);
 }
 
+/**
+ *  Change the game's language.
+ **/
 void Game::setLanguage(Game::Language l)
 {
     lang = l;
 }
 
+
+/**
+ *  Add player with a specified name. 
+ **/
 void Game::addPlayer(const wchar_t *name)
 {
     if (wcslen(name) > MAX_PLAYER_NAME_LEN)
@@ -78,6 +94,9 @@ void Game::addPlayer(const wchar_t *name)
     players.back().takeLetters(&letterBag, MAX_LETTERS_ON_HAND);
 }
 
+/**
+ *  A function used to capture key press events.
+ **/
 void Game::keyPressEvent(KeyEvent *e)
 {
     if (commited) // Ignore all inputs after commiting tiles on board
@@ -126,6 +145,9 @@ void Game::keyPressEvent(KeyEvent *e)
     cursor.fitInBox(0,0,SCRABBLE_BOARD_SIZE-1, SCRABBLE_BOARD_SIZE-1);
 }
 
+/**
+ *  A function used to capture key release events.
+ **/
 void Game::keyReleaseEvent(KeyEvent *e)
 {
     if (e->key() == VK_RMENU)

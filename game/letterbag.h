@@ -10,7 +10,7 @@ class LetterBag
 public:
     LetterBag(std::initializer_list< std::pair<wchar_t, int> > init = {});
 
-    bool empty() const {return bag.empty();}
+    bool empty() const {return bag.empty();}  /*!< Check if bag is empty. */
     wchar_t pop();
     void insert(wchar_t letter);
     void loadPolishScrabble();

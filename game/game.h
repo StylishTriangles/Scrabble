@@ -33,9 +33,9 @@ public:
     void keyPressEvent(KeyEvent* e);
     void keyReleaseEvent(KeyEvent* e);
 
-    void disableSeizureMode();
-
 private:
+    void disableSeizureMode();
+	
     void bindEvents();
     void setupWidgets();
     void setupBoard();

@@ -2,6 +2,10 @@
 #include <algorithm>
 #include <ctime>
 
+/**
+ *  @brief Default constructor for LetterBag.
+ *	@param init: initializer_list with available letters and their count.
+ **/
 LetterBag::LetterBag(std::initializer_list<std::pair<wchar_t, int> > init) :
     rng(unsigned(time(nullptr)))
 {
@@ -27,6 +31,9 @@ void LetterBag::constructBag(const std::initializer_list<std::pair<wchar_t, int>
     }
 }
 
+/**
+ *  @brief Take a letter from bag.
+ **/
 wchar_t LetterBag::pop()
 {
     wchar_t ret = bag.back();
@@ -34,12 +41,20 @@ wchar_t LetterBag::pop()
     return ret;
 }
 
+/**
+ *  @brief Insert a letter into the bag.
+ *	The letter will be shuffled into the bag.
+ **/
 void LetterBag::insert(wchar_t letter)
 {
     int pos = int(rng() % bag.size());
     bag.insert(bag.begin()+pos, letter);
 }
 
+/**
+ *  @brief Load polish version of the Scrabble game.
+ *	Remove all letters from bag and insert letters from polish Scrabble version.
+ **/
 void LetterBag::loadPolishScrabble()
 {
     constructBag({

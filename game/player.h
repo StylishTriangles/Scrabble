@@ -25,14 +25,14 @@ public:
     void discardLetters(LetterBag* bag); // discard marked letters and put them into bag
     void keepLetters(); // don't discard letters
     unsigned letterCount() const;
-    void addScore(int amount) {score += amount;}
-    const int& getScore() const {return score;}
-    bool isActive() const {return active;}
-    void activate() {active = true;}
-    void deactivate() {active = false;}
+    void addScore(int amount) {score += amount;} /*!< Increase score by specified amount. */
+    const int& getScore() const {return score;} /*!< Return Player's score. */
+    bool isActive() const {return active;} /*!< Return true if player is playing his turn. */
+    void activate() {active = true;} /*!< Player starts playing his turn. */
+    void deactivate() {active = false;} /*!< Player stops playing his turn. */
 
-    const wchar_t* name() const {return myName;}
-    void name(const wchar_t* name) {myName = name;} // wordplay setter
+    const wchar_t* name() const {return myName;} /*!< Return Player's name. */
+    void name(const wchar_t* name) {myName = name;} /*!< Set Player's name. */
 
     const std::pair<wchar_t, int> &operator [] (unsigned letterNumber) const; // make it easy to iterate over letters
 
